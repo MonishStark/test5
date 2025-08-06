@@ -15,11 +15,25 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { InputSanitizer } from "./security-utils.js";
 import path from "path";
+import { storage } from "./storage";
 // Use simple job queue by default (no Redis dependency)
 import { jobQueueManager } from "./jobQueueSimple";
 
 // Constants
 const LOG_LINE_TRUNCATE_LENGTH = 79;
+
+/**
+ * Helper function to retrieve the actual file path for a track from the database
+ * @param trackId - The ID of the track
+ * @returns Promise<string> - The original file path or throws an error if not found
+ */
+async function getTrackFilePath(trackId: number): Promise<string> {
+	const track = await storage.getAudioTrack(trackId);
+	if (!track) {
+		throw new Error(`Track with ID ${trackId} not found`);
+	}
+	return track.originalPath;
+}
 
 const app = express();
 
@@ -112,10 +126,21 @@ app.use((req, res, next) => {
 			// Generate job ID using centralized utility
 			const jobId = InputSanitizer.generateJobId();
 
+			// Retrieve the actual file path for the track from the database
+			let originalPath: string;
+			try {
+				originalPath = await getTrackFilePath(trackId);
+			} catch (error) {
+				return res.status(404).json({
+					message: `Track with ID ${trackId} not found`,
+					error: error instanceof Error ? error.message : "Unknown error",
+				});
+			}
+
 			const jobData = {
 				jobId,
 				trackId,
-				originalPath: path.join("uploads", `track-${trackId}.mp3`), // Secure path construction
+				originalPath, // Use the actual file path
 				outputPath: path.join("results", `track-${trackId}-extended.mp3`),
 				settings,
 				userId: 1, // Placeholder

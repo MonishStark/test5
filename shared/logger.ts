@@ -121,8 +121,7 @@ class Logger {
 					break;
 			}
 		} else {
-			// In production, only log errors and above
-			if (level >= LogLevel.ERROR) {
+			if (level >= LogLevel.WARN) {
 				// eslint-disable-next-line no-console
 				console.error(formattedMessage);
 			}
