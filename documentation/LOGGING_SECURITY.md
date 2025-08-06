@@ -38,16 +38,30 @@ def get_log_format():
 LOG_FORMAT = get_log_format()
 ```
 
+### Log Level Validation
+
+```python
+# Validate LOG_LEVEL against allowed values to prevent injection
+ALLOWED_LOG_LEVELS = {"CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"}
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
+if LOG_LEVEL not in ALLOWED_LOG_LEVELS:
+    LOG_LEVEL = "INFO"
+```
+
 ## Usage
 
 ### Environment Configuration
 
 ```bash
-# Valid options: DEFAULT, SHORT, SIMPLE
+# Valid log format options: DEFAULT, SHORT, SIMPLE
 LOG_FORMAT_TYPE=SHORT
 
-# Invalid values fallback to DEFAULT automatically
+# Valid log level options: CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET
+LOG_LEVEL=DEBUG
+
+# Invalid values fallback automatically
 LOG_FORMAT_TYPE=INVALID_VALUE  # Uses DEFAULT format
+LOG_LEVEL=INVALID_LEVEL        # Uses INFO level
 ```
 
 ### Available Formats
@@ -64,6 +78,37 @@ LOG_FORMAT_TYPE=INVALID_VALUE  # Uses DEFAULT format
 2. **Validation**: Only predefined enum values are accepted
 3. **Fallback Safety**: Invalid values automatically use secure defaults
 4. **Type Safety**: Python enum provides compile-time validation
+
+## Audio Processing Randomization Security
+
+### Before (Predictable)
+
+```python
+# Version-based seed made shuffle patterns deterministic and exploitable
+random.seed(version * SHUFFLE_SEED_MULTIPLIER)
+intro_labels = ['drums', 'other', 'drums', 'vocals']
+intro_segments = [full_intro_drums, full_intro_other, full_intro_drums, intro_vocals]
+intro_zipped = list(zip(intro_labels, intro_segments))
+random.shuffle(intro_zipped)
+random.seed()  # Reset seed
+```
+
+### After (Cryptographically Secure)
+
+```python
+# Cryptographically secure random shuffle for unpredictability
+intro_labels = ['drums', 'other', 'drums', 'vocals']
+intro_segments = [full_intro_drums, full_intro_other, full_intro_drums, intro_vocals]
+intro_zipped = list(zip(intro_labels, intro_segments))
+random.SystemRandom().shuffle(intro_zipped)
+```
+
+### Randomization Security Benefits
+
+1. **Unpredictable Patterns**: Uses OS entropy source for true randomness
+2. **No Exploitable Seeds**: Cannot predict shuffle patterns from version numbers
+3. **Cryptographic Quality**: SystemRandom uses cryptographically secure algorithms
+4. **No State Pollution**: Doesn't affect global random state with seeds
 
 ## Audio Processing Constants Enhancement
 

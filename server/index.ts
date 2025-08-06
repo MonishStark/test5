@@ -45,7 +45,7 @@ app.use((req, res, next) => {
 	const start = Date.now();
 	const path = req.path;
 	// skipcq: JS-0126
-	let responseBody: Record<string, unknown> | undefined = undefined;
+	let responseBody: Record<string, unknown> | undefined;
 
 	const originalResJson = res.json;
 	res.json = function (bodyJson, ...args) {

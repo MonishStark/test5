@@ -37,6 +37,12 @@ export default defineConfig({
 		},
 	},
 
+	// esbuild configuration for faster builds and minification
+	esbuild: {
+		drop: ["console", "debugger"],
+		pure: ["console.log", "console.info"],
+	},
+
 	// Set the root directory to the client folder for frontend development
 	// This allows Vite to serve the React application from the correct location
 	root: path.resolve(__dirname, "client"),
@@ -108,19 +114,8 @@ export default defineConfig({
 			},
 		},
 
-		// Enable minification for production
-		minify: "terser",
-		terserOptions: {
-			compress: {
-				drop_console: true,
-				drop_debugger: true,
-				pure_funcs: ["console.log", "console.info"],
-				dead_code: true,
-			},
-			mangle: {
-				safari10: true,
-			},
-		},
+		// Enable minification for production (using esbuild for faster builds)
+		minify: "esbuild",
 
 		// Chunk size warnings
 		chunkSizeWarningLimit: 600,

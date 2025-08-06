@@ -39,7 +39,12 @@ def get_log_format():
 
 # Use enum-based log format instead of environment variable for security
 LOG_FORMAT = get_log_format()
+
+# Validate LOG_LEVEL against allowed values to prevent injection
+ALLOWED_LOG_LEVELS = {"CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"}
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
+if LOG_LEVEL not in ALLOWED_LOG_LEVELS:
+    LOG_LEVEL = "INFO"
 logging.basicConfig(
     level=getattr(logging, LOG_LEVEL, logging.INFO),
     format=LOG_FORMAT

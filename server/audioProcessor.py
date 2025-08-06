@@ -32,7 +32,6 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger(__name__)
 
 # Configuration constants
-SHUFFLE_SEED_MULTIPLIER = 42  # Multiplier for version-based random seed to ensure reproducible shuffling
 DEFAULT_BARS_COUNT = 4        # Default number of bars to extract for intro/outro sections
 DEFAULT_BEATS_PER_BAR = 4     # Standard beats per bar in most music
 OTHER_STEM_GAIN_DB = 9        # Gain boost for 'other' stem in decibels
@@ -190,16 +189,14 @@ def create_extended_mix(components, output_path, intro_bars, outro_bars, _preser
         intro_vocals = pick_loudest_bars(
             vocals, beat_times_ms, bars=intro_bars)
 
-        random.seed(version * SHUFFLE_SEED_MULTIPLIER)
-
+        # Use a cryptographically secure random shuffle for unpredictability
         intro_labels = ['drums', 'other', 'drums', 'vocals']
         intro_segments = [full_intro_drums,
                           full_intro_other, full_intro_drums, intro_vocals]
         intro_zipped = list(zip(intro_labels, intro_segments))
-        random.shuffle(intro_zipped)
+        random.SystemRandom().shuffle(intro_zipped)
         intro_components = [seg for (_, seg) in intro_zipped]
         shuffled_intro_order = [label for (label, _) in intro_zipped]
-        random.seed()
 
         full_intro = sum(intro_components).fade_in(2000)
 
