@@ -31,6 +31,14 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Configuration constants
+SHUFFLE_SEED_MULTIPLIER = 42  # Multiplier for version-based random seed to ensure reproducible shuffling
+DEFAULT_BARS_COUNT = 4        # Default number of bars to extract for intro/outro sections
+DEFAULT_BEATS_PER_BAR = 4     # Standard beats per bar in most music
+OTHER_STEM_GAIN_DB = 9        # Gain boost for 'other' stem in decibels
+MS_PER_SECOND = 1000         # Milliseconds per second conversion factor
+MINIMUM_BEATS_BUFFER = 8      # Minimum beats required beyond intro+outro for processing
+
 
 try:
     import madmom
@@ -129,7 +137,7 @@ def separate_audio_components(audio_path, output_dir):
         logger.error("Error during audio separation: %s", str(e))
         return None
 
-def pick_loudest_bars(stem, beats_ms, bars=4, beats_per_bar=4):
+def pick_loudest_bars(stem, beats_ms, bars=DEFAULT_BARS_COUNT, beats_per_bar=DEFAULT_BEATS_PER_BAR):
     total_beats = len(beats_ms)
     window = beats_per_bar * bars
     max_rms = -1
@@ -153,11 +161,11 @@ def create_extended_mix(components, output_path, intro_bars, outro_bars, _preser
         "Creating extended mix with %s bars intro and %s bars outro", intro_bars, outro_bars)
 
     try:
-        beats_per_bar = 4
+        beats_per_bar = DEFAULT_BEATS_PER_BAR
         intro_beats = intro_bars * beats_per_bar
         outro_beats = outro_bars * beats_per_bar
 
-        if len(beat_times) < (intro_beats + outro_beats + 8):
+        if len(beat_times) < (intro_beats + outro_beats + MINIMUM_BEATS_BUFFER):
             logger.warning(
                 "Not enough beats detected (%s) for requested extension", len(beat_times))
             return False
@@ -170,10 +178,10 @@ def create_extended_mix(components, output_path, intro_bars, outro_bars, _preser
                 pass
 
         drums = AudioSegment.from_file(components['drums'])
-        other = AudioSegment.from_file(components['other']).apply_gain(9)
+        other = AudioSegment.from_file(components['other']).apply_gain(OTHER_STEM_GAIN_DB)
         vocals = AudioSegment.from_file(components['vocals'])
 
-        beat_times_ms = [t * 1000 for t in beat_times]
+        beat_times_ms = [t * MS_PER_SECOND for t in beat_times]
 
         full_intro_drums = pick_loudest_bars(
             drums, beat_times_ms, bars=intro_bars)
@@ -182,7 +190,7 @@ def create_extended_mix(components, output_path, intro_bars, outro_bars, _preser
         intro_vocals = pick_loudest_bars(
             vocals, beat_times_ms, bars=intro_bars)
 
-        random.seed(version * 42)
+        random.seed(version * SHUFFLE_SEED_MULTIPLIER)
 
         intro_labels = ['drums', 'other', 'drums', 'vocals']
         intro_segments = [full_intro_drums,

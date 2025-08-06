@@ -20,17 +20,25 @@ import librosa
 import numpy as np
 from os import path
 from pydub import AudioSegment
-# Whitelist of allowed log format strings
-ALLOWED_LOG_FORMATS = {
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    "%(levelname)s:%(name)s:%(message)s",
-    "%(asctime)s %(levelname)s %(message)s",
-}
-_env_log_format = os.environ.get("LOG_FORMAT", "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-if _env_log_format in ALLOWED_LOG_FORMATS:
-    LOG_FORMAT = _env_log_format
-else:
-    LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+from enum import Enum
+
+class LogFormat(Enum):
+    """Secure log format enumeration to prevent injection attacks"""
+    DEFAULT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    SHORT = "%(levelname)s:%(name)s:%(message)s"
+    SIMPLE = "%(asctime)s %(levelname)s %(message)s"
+
+def get_log_format():
+    """Get log format from environment with validation against enum values"""
+    env_format = os.environ.get("LOG_FORMAT_TYPE", "DEFAULT").upper()
+    try:
+        return LogFormat[env_format].value
+    except KeyError:
+        # Fallback to default if invalid format specified
+        return LogFormat.DEFAULT.value
+
+# Use enum-based log format instead of environment variable for security
+LOG_FORMAT = get_log_format()
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(
     level=getattr(logging, LOG_LEVEL, logging.INFO),

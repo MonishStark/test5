@@ -98,7 +98,7 @@ export default defineConfig({
 				},
 			},
 			// External dependencies that should not be bundled
-			external: (_id) => {
+			external: () => {
 				// Keep all dependencies internal for now to avoid runtime issues
 				return false;
 			},

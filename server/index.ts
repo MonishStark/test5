@@ -13,6 +13,7 @@ import {
 } from "./security-middleware";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { logger } from "../shared/logger";
 
 // Constants
 const LOG_LINE_TRUNCATE_LENGTH = 79;
@@ -89,8 +90,17 @@ app.use((req, res, next) => {
 			const status = err.status || err.statusCode || 500;
 			const message = err.message || "Internal Server Error";
 
+			// Log the error instead of throwing it to prevent application crashes
+			logger.error(
+				"Error handler middleware caught error",
+				err,
+				{
+					status,
+				},
+				"HTTP"
+			);
+
 			res.status(status).json({ message });
-			throw err;
 		}
 	);
 

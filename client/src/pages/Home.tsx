@@ -95,7 +95,7 @@ const Home: React.FC = () => {
 
 	// Handle track selection when tracks change
 	useEffect(() => {
-		if (!currentTrackId && tracks && tracks.length > 0) {
+		if (!currentTrackId && tracks && tracks?.length > 0) {
 			setCurrentTrackId(tracks[0].id);
 			setIsProcessed(tracks[0].status === "completed");
 		}
