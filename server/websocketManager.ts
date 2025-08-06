@@ -142,8 +142,11 @@ export class WebSocketManager {
 				} catch (error) {
 					socket.emit("error", {
 						type: "job-status-error",
-						message: "Failed to get job status",
-						error: error instanceof Error ? error.message : "Unknown error",
+						message: `Failed to get job status for jobId ${data.jobId}`,
+						error:
+							error instanceof Error
+								? error.message
+								: `Unknown error for jobId ${data.jobId}`,
 					});
 				}
 			});

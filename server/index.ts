@@ -14,7 +14,7 @@ import {
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { InputSanitizer } from "./security-utils.js";
-
+import crypto from "crypto";
 // Use simple job queue by default (no Redis dependency)
 import { jobQueueManager } from "./jobQueueSimple";
 

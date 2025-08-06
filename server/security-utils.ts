@@ -32,11 +32,34 @@ export class SecurePathValidator {
 	];
 
 	constructor(allowedDirectories: string[]) {
-		this.allowedDirectories = new Set(
-			allowedDirectories.map((dir) => path.resolve(dir)) // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+		const validatedDirs = allowedDirectories.filter(
+			SecurePathValidator.isSafeDirectory
 		);
+		this.allowedDirectories = new Set(
+			validatedDirs.map((dir) => path.resolve(dir))
+		);
+		if (validatedDirs.length !== allowedDirectories.length) {
+			throw new Error(
+				"One or more allowedDirectories entries are invalid or unsafe."
+			);
+		}
 	}
-
+	/**
+	 * Validate that a directory path is safe (no traversal, absolute or relative, no dangerous chars)
+	 */
+	private static isSafeDirectory(dir: string): boolean {
+		if (typeof dir !== "string" || dir.length === 0) return false;
+		// Disallow path traversal
+		if (dir.includes("..")) return false;
+		// Disallow null bytes and dangerous characters
+		if (/[<>"|*?\0]/.test(dir)) return false;
+		// Disallow Windows reserved names
+		if (/(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])/i.test(path.basename(dir)))
+			return false;
+		// Optionally, require absolute or relative path (not URLs, etc.)
+		if (dir.startsWith("http://") || dir.startsWith("https://")) return false;
+		return true;
+	}
 	/**
 	 * Comprehensive path validation with multiple security checks
 	 */
