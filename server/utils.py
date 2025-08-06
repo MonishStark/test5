@@ -20,7 +20,17 @@ import librosa
 import numpy as np
 from os import path
 from pydub import AudioSegment
-LOG_FORMAT = os.environ.get("LOG_FORMAT", "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+# Whitelist of allowed log format strings
+ALLOWED_LOG_FORMATS = {
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "%(levelname)s:%(name)s:%(message)s",
+    "%(asctime)s %(levelname)s %(message)s",
+}
+_env_log_format = os.environ.get("LOG_FORMAT", "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+if _env_log_format in ALLOWED_LOG_FORMATS:
+    LOG_FORMAT = _env_log_format
+else:
+    LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(
     level=getattr(logging, LOG_LEVEL, logging.INFO),

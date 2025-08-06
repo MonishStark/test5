@@ -38,7 +38,7 @@ export function sanitizeForLog(input: unknown): string {
 	// that could be used for log injection or manipulation
 	return strInput
 		.replace(/%[sdifj%]/gu, "") // Remove format specifiers
-		.replace(/[^\x20-\x7E]/gu, "") // Keep only printable ASCII characters for security
+		.replace(/[\x00-\x1F\x7F]/gu, "") // Remove control characters for security, allow Unicode
 		.substring(0, 1000); // Limit length to prevent log flooding
 }
 

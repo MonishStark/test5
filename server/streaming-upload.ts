@@ -496,9 +496,28 @@ export class AudioFileStreamProcessor {
 		try {
 			await fs.unlink(filePath);
 		} catch (error) {
-			logger.warn("Failed to cleanup file", {
+			// Extract error details with proper typing
+			const nodeError = error as NodeJS.ErrnoException;
+			const errorDetails =
+				error instanceof Error
+					? {
+							message: error.message,
+							code: nodeError.code || "UNKNOWN",
+							errno: nodeError.errno || "N/A",
+					  }
+					: {
+							message: String(error),
+							code: "UNKNOWN",
+							errno: "N/A",
+					  };
+
+			logger.warn("Failed to cleanup temporary file", {
+				operation: "file_deletion",
 				filePath,
-				error: error instanceof Error ? error.message : String(error),
+				errorCode: errorDetails.code,
+				errorNumber: errorDetails.errno,
+				errorMessage: errorDetails.message,
+				context: "streaming_upload_cleanup",
 			});
 		}
 	}

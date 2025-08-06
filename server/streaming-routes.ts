@@ -15,6 +15,7 @@ import { Router, Request, Response } from "express";
 import path from "path";
 import crypto from "crypto";
 import { promises as fs } from "fs";
+import { logger } from "../shared/logger";
 import {
 	createStreamingUploader,
 	trackUploadProgress,
@@ -298,8 +299,30 @@ router.delete("/upload/:uploadId", async (req: Request, res: Response) => {
 		try {
 			await streamProcessor.cleanup(tempPattern);
 		} catch (error) {
-			// Ignore cleanup errors as files might not exist
-			console.warn("Cleanup warning:", error);
+			// Extract error details with proper typing for better debugging
+			const nodeError = error as NodeJS.ErrnoException;
+			const errorDetails =
+				error instanceof Error
+					? {
+							message: error.message,
+							code: nodeError.code || "UNKNOWN",
+							errno: nodeError.errno || "N/A",
+					  }
+					: {
+							message: String(error),
+							code: "UNKNOWN",
+							errno: "N/A",
+					  };
+
+			logger.warn("Failed to cleanup temporary upload files", {
+				operation: "upload_cancellation_cleanup",
+				uploadId,
+				tempPattern,
+				errorCode: errorDetails.code,
+				errorNumber: errorDetails.errno,
+				errorMessage: errorDetails.message,
+				context: "streaming_upload_cancellation",
+			});
 		}
 
 		// Remove from progress tracking

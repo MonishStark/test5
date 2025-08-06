@@ -167,7 +167,8 @@ const storage_config = multer.diskStorage({
 			return cb(
 				new Error(
 					"Invalid file extension. Only MP3, WAV, FLAC, and AIFF files are allowed."
-				)
+				),
+				""
 			);
 		}
 		cb(null, uniqueSuffix + extension);
@@ -264,12 +265,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 							filePath: req.file.path,
 						});
 					} catch (cleanupError) {
-						logger.warn("Failed to cleanup invalid file", {
+						// Extract error details with proper typing for better debugging
+						const nodeError = cleanupError as NodeJS.ErrnoException;
+						const errorDetails =
+							cleanupError instanceof Error
+								? {
+										message: cleanupError.message,
+										code: nodeError.code || "UNKNOWN",
+										errno: nodeError.errno || "N/A",
+								  }
+								: {
+										message: String(cleanupError),
+										code: "UNKNOWN",
+										errno: "N/A",
+								  };
+
+						logger.warn("Failed to cleanup invalid uploaded file", {
+							operation: "invalid_file_cleanup",
 							filePath: req.file.path,
-							error:
-								cleanupError instanceof Error
-									? cleanupError.message
-									: String(cleanupError),
+							errorCode: errorDetails.code,
+							errorNumber: errorDetails.errno,
+							errorMessage: errorDetails.message,
+							context: "upload_validation_cleanup",
 						});
 					}
 					return res
