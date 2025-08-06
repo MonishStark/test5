@@ -19,6 +19,10 @@ const uploadsDir =
 const resultDir =
 	process.env.RESULTS_DIR || path.join(process.cwd(), "results");
 
+// Configuration constants
+const MAX_VERSION_LIMIT = parseInt(process.env.MAX_VERSION_LIMIT || "3", 10);
+const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || "15728640", 10); // 15MB default
+
 // Initialize security components
 const allowedDirectories = [uploadsDir, resultDir];
 const secureValidator = new SecurePathValidator(allowedDirectories);
@@ -139,7 +143,7 @@ const storage_config = multer.diskStorage({
 const upload = multer({
 	storage: storage_config,
 	limits: {
-		fileSize: 15 * 1024 * 1024,
+		fileSize: MAX_FILE_SIZE,
 	},
 	fileFilter: (req, file, cb) => {
 		const allowedMimeTypes = [
@@ -444,9 +448,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 			// Check version limit
 
-			if (track.versionCount > 3) {
+			if (track.versionCount > MAX_VERSION_LIMIT) {
 				return res.status(400).json({
-					message: "Maximum version limit (3) reached",
+					message: `Maximum version limit (${MAX_VERSION_LIMIT}) reached`,
 				});
 			}
 
