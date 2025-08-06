@@ -155,7 +155,6 @@ def create_extended_mix(components, output_path, intro_bars, outro_bars, _preser
                 pass
 
         drums = AudioSegment.from_file(components['drums'])
-        bass = AudioSegment.from_file(components['bass']) + 12
         other = AudioSegment.from_file(components['other']).apply_gain(9)
         vocals = AudioSegment.from_file(components['vocals'])
 
@@ -163,8 +162,6 @@ def create_extended_mix(components, output_path, intro_bars, outro_bars, _preser
 
         full_intro_drums = pick_loudest_bars(
             drums, beat_times_ms, bars=intro_bars)
-        _unused_full_intro_bass = pick_loudest_bars(
-            bass, beat_times_ms, bars=intro_bars)
         full_intro_other = pick_loudest_bars(
             other, beat_times_ms, bars=intro_bars)
         intro_vocals = pick_loudest_bars(

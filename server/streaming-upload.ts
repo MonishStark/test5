@@ -491,7 +491,7 @@ export class AudioFileStreamProcessor {
 	/**
 	 * Clean up temporary files
 	 */
-	// skipcq: JS-0105
+	// skipcq: JS-0105 -- This method is required to match the class interface and is intentionally not static.
 	async cleanup(filePath: string): Promise<void> {
 		try {
 			await fs.unlink(filePath);
