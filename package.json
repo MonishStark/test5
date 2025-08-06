@@ -13,7 +13,6 @@
 		"clean": "rimraf dist uploads/* results/*",
 		"db:test": "node scripts/test-db-connection.js",
 		"start:dev": "node scripts/start-app.bat",
-		"test:streaming": "node scripts/test-streaming-upload.js",
 		"analyze:bundle": "node scripts/bundle-size-monitor.js",
 		"build:analyze": "npm run build && npm run analyze:bundle",
 		"build:stats": "vite build --mode production && npx vite-bundle-analyzer dist/public/assets/*.js",

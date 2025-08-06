@@ -10,7 +10,6 @@ import path from "path";
 import fs from "fs";
 import { promises as fsPromises } from "fs";
 import { PythonShell } from "python-shell";
-import streamingRoutes from "./streaming-routes.js";
 import { SecurePathValidator, InputSanitizer } from "./security-utils.js";
 import crypto from "crypto";
 
@@ -820,9 +819,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 			});
 		}
 	});
-
-	// Add streaming upload routes for large file support
-	app.use("/api/streaming", streamingRoutes);
 
 	return httpServer;
 }

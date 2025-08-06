@@ -13,7 +13,7 @@ export { Circle } from "lucide-react";
 export { Search } from "lucide-react";
 export { ArrowLeft, ArrowRight } from "lucide-react";
 
-// Icons used in JobQueueMonitor and EnhancedSettingsPanel
+// Icons used in various components
 export {
 	Clock,
 	CheckCircle,

@@ -138,7 +138,7 @@ export class SecurePathValidator {
 
 	/**
 	 * Secure filename sanitization
-	 * Consolidated from routes.ts and streaming-upload.ts to maintain single source of truth
+	 * Consolidated from routes.ts to maintain single source of truth
 	 */
 	// skipcq: JS-0105
 	sanitizeFilename(filename: string): string {
@@ -169,7 +169,7 @@ export class SecurePathValidator {
 
 	/**
 	 * Security utility function to validate file paths and prevent path traversal
-	 * Consolidated from routes.ts and streaming-upload.ts to maintain single source of truth
+	 * Consolidated from routes.ts to maintain single source of truth
 	 *
 	 * @param filePath - The file path to validate
 	 * @param allowedDirectory - The directory that the file path must be within

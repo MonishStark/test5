@@ -13,27 +13,9 @@ import {
 } from "./security-middleware";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { InputSanitizer } from "./security-utils.js";
-import path from "path";
-import { storage } from "./storage";
-// Use simple job queue by default (no Redis dependency)
-import { jobQueueManager } from "./jobQueueSimple";
 
 // Constants
 const LOG_LINE_TRUNCATE_LENGTH = 79;
-
-/**
- * Helper function to retrieve the actual file path for a track from the database
- * @param trackId - The ID of the track
- * @returns Promise<string> - The original file path or throws an error if not found
- */
-async function getTrackFilePath(trackId: number): Promise<string> {
-	const track = await storage.getAudioTrack(trackId);
-	if (!track) {
-		throw new Error(`Track with ID ${trackId} not found`);
-	}
-	return track.originalPath;
-}
 
 const app = express();
 
@@ -93,103 +75,8 @@ app.use((req, res, next) => {
 (async () => {
 	const server = await registerRoutes(app);
 
-	// Simple setup for development mode (no Redis/WebSocket requirements)
-	console.log("🚀 Starting server in simple mode (no Redis required)");
-
-	// Add basic job queue routes
-	app.get("/api/health/job-queue", async (req, res) => {
-		const health = await jobQueueManager.getHealth();
-		res.json(health);
-	});
-
-	app.get("/api/admin/queue-stats", async (req, res) => {
-		const stats = await jobQueueManager.getQueueStats();
-		res.json(stats);
-	});
-
-	// skipcq: JS-0045
-	app.post("/api/tracks/:id/process-async", async (req, res) => {
-		try {
-			// Enhanced security: Validate and sanitize ID parameter
-			const trackId = InputSanitizer.sanitizeIntParam(
-				req.params.id,
-				1,
-				Number.MAX_SAFE_INTEGER
-			);
-			if (trackId === null) {
-				return res.status(400).json({
-					message: "Invalid track ID: must be a positive integer",
-				});
-			}
-			const settings = req.body;
-
-			// Generate job ID using centralized utility
-			const jobId = InputSanitizer.generateJobId();
-
-			// Retrieve the actual file path for the track from the database
-			let originalPath: string;
-			try {
-				originalPath = await getTrackFilePath(trackId);
-			} catch (error) {
-				return res.status(404).json({
-					message: `Track with ID ${trackId} not found`,
-					error: error instanceof Error ? error.message : "Unknown error",
-				});
-			}
-
-			const jobData = {
-				jobId,
-				trackId,
-				originalPath, // Use the actual file path
-				outputPath: path.join("results", `track-${trackId}-extended.mp3`),
-				settings,
-				userId: 1, // Placeholder
-				priority: settings.priority || 2,
-				useOptimization: settings.useOptimization || false,
-			};
-
-			const resultJobId = await jobQueueManager.addAudioProcessingJob(jobData);
-
-			res.json({
-				message: "Audio processing job queued successfully",
-				jobId: resultJobId,
-				trackId,
-				status: "queued",
-				estimatedProcessingTime: "2-5 minutes",
-			});
-		} catch (error) {
-			console.error("Error queuing job:", error);
-			res.status(500).json({ error: "Failed to queue processing job" });
-		}
-	});
-
-	app.get("/api/jobs/:jobId/status", async (req, res) => {
-		try {
-			const jobId = req.params.jobId;
-			const status = await jobQueueManager.getJobStatus(jobId);
-			res.json(status);
-		} catch (error) {
-			console.error("Error getting job status:", error);
-			res.status(500).json({ error: "Failed to get job status" });
-		}
-	});
-
-	app.delete("/api/jobs/:jobId", async (req, res) => {
-		try {
-			const jobId = req.params.jobId;
-			const cancelled = await jobQueueManager.cancelJob(jobId);
-			res.json({
-				message: cancelled
-					? "Job cancelled successfully"
-					: "Job not found or not cancellable",
-				jobId,
-				cancelled,
-			});
-		} catch (error) {
-			console.error("Error cancelling job:", error);
-			res.status(500).json({ error: "Failed to cancel job" });
-		}
-	});
+	// Simple setup for development mode
+	console.log("🚀 Starting server in simple mode");
 
 	// Define interface for HTTP errors with status codes
 	interface HttpError extends Error {
@@ -224,8 +111,7 @@ app.use((req, res, next) => {
 		},
 		() => {
 			log(`serving on port ${port}`);
-			log("Server running in simple mode (no Redis required)");
-			log("Job queue active with direct processing");
+			log("Server running in simple mode");
 		}
 	);
 
@@ -234,7 +120,6 @@ app.use((req, res, next) => {
 		log("SIGTERM received, shutting down gracefully...");
 
 		try {
-			await jobQueueManager.shutdown();
 			server.close(() => {
 				log("Server shutdown completed");
 			});
@@ -251,7 +136,6 @@ app.use((req, res, next) => {
 		log("SIGINT received, shutting down gracefully...");
 
 		try {
-			await jobQueueManager.shutdown();
 			server.close(() => {
 				log("Server shutdown completed");
 			});
