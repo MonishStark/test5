@@ -22,6 +22,26 @@ export interface LogEntry {
 	module?: string;
 }
 
+/**
+ * Utility function to sanitize user input for safe logging
+ * Prevents log injection attacks and controls log output format
+ * Consolidated from multiple files to maintain single source of truth
+ */
+export function sanitizeForLog(input: unknown): string {
+	if (input === null || input === undefined) {
+		return String(input);
+	}
+
+	const strInput = typeof input === "string" ? input : String(input);
+
+	// Remove format specifiers, control characters, and non-printable characters
+	// that could be used for log injection or manipulation
+	return strInput
+		.replace(/%[sdifj%]/gu, "") // Remove format specifiers
+		.replace(/[^\x20-\x7E]/gu, "") // Keep only printable ASCII characters for security
+		.substring(0, 1000); // Limit length to prevent log flooding
+}
+
 class Logger {
 	private isDevelopment: boolean;
 	private minLogLevel: LogLevel;

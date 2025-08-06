@@ -15,7 +15,12 @@ import { eq, desc } from "drizzle-orm";
 
 // Ensure DATABASE_URL is defined
 if (!process.env.DATABASE_URL) {
-	throw new Error("DATABASE_URL environment variable is not defined");
+	throw new Error(
+		"DATABASE_URL environment variable is not defined.\n" +
+			"Please set DATABASE_URL to your PostgreSQL connection string.\n" +
+			"You can set it in a .env file or as an environment variable.\n" +
+			"See the README or https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING for more information."
+	);
 }
 
 const pool = new Pool({

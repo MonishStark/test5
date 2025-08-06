@@ -104,7 +104,7 @@ export function setupJobQueueRoutes(app: Express) {
 
 				// Create job data object
 				const jobData = {
-					jobId: `audio_${id}_${Date.now()}`,
+					jobId: InputSanitizer.generateJobId(),
 					trackId: id,
 					originalPath: track.originalPath,
 					outputPath,
@@ -369,7 +369,7 @@ export function setupJobQueueRoutes(app: Express) {
 					const outputPath = path.join(resultDir, outputFilename);
 					// Create job data object for bulk processing
 					const jobData = {
-						jobId: `audio_${trackId}_${Date.now()}_bulk`,
+						jobId: InputSanitizer.generateJobId(),
 						trackId,
 						originalPath: track.originalPath,
 						outputPath,

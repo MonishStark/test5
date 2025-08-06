@@ -18,7 +18,7 @@ import { Server as SocketIOServer, Socket } from "socket.io";
 import { Server as HTTPServer } from "http";
 import { jobQueueManager } from "./jobQueueSimple";
 import { websocketCorsOptions } from "./cors-config";
-import { logger } from "../shared/logger";
+import { logger, sanitizeForLog } from "../shared/logger";
 
 // Define proper interfaces for job progress and data
 interface JobProgress {
@@ -39,15 +39,6 @@ interface QueueStatsItem {
 	delayed: number;
 	paused: number;
 	total: number;
-}
-
-// Utility function to sanitize user input for logging
-function sanitizeForLog(input: unknown): string {
-	const strInput = typeof input === "string" ? input : String(input);
-	// Remove newlines, carriage returns, and control characters that could be used for log injection
-	return strInput
-		.replace(/[^\x20-\x7E]/gu, "") // skipcq: JS-W1035 - Keep only printable ASCII characters for security
-		.substring(0, 1000);
 }
 
 /**

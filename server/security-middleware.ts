@@ -2,6 +2,7 @@
 
 import type { Request, Response, NextFunction } from "express";
 import rateLimit from "express-rate-limit";
+import { sanitizeForLog } from "../shared/logger";
 
 /**
  * Security Middleware Configuration
@@ -130,7 +131,9 @@ export const validateOrigin = (
 
 	// Log suspicious requests
 	if (origin && !isValidOrigin(origin)) {
-		console.warn(`🚫 Suspicious request from origin: ${origin}`);
+		console.warn(
+			`🚫 Suspicious request from origin: ${sanitizeForLog(origin)}`
+		);
 	}
 
 	next();

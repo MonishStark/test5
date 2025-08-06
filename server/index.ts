@@ -14,7 +14,6 @@ import {
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { InputSanitizer } from "./security-utils.js";
-import crypto from "crypto";
 // Use simple job queue by default (no Redis dependency)
 import { jobQueueManager } from "./jobQueueSimple";
 
@@ -106,9 +105,8 @@ app.use((req, res, next) => {
 			}
 			const settings = req.body;
 
-			// Generate job ID
-
-			const jobId = "job-" + crypto.randomUUID(); // skipcq: JS-0246
+			// Generate job ID using centralized utility
+			const jobId = InputSanitizer.generateJobId();
 
 			const jobData = {
 				jobId,

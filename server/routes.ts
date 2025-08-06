@@ -161,7 +161,15 @@ const storage_config = multer.diskStorage({
 		const sanitizedOriginalName = secureValidator.sanitizeFilename(
 			file.originalname
 		);
-		const extension = path.extname(sanitizedOriginalName);
+		const extension = path.extname(sanitizedOriginalName).toLowerCase();
+		const allowedExtensions = [".mp3", ".wav", ".flac", ".aiff"];
+		if (!allowedExtensions.includes(extension)) {
+			return cb(
+				new Error(
+					"Invalid file extension. Only MP3, WAV, FLAC, and AIFF files are allowed."
+				)
+			);
+		}
 		cb(null, uniqueSuffix + extension);
 	},
 });

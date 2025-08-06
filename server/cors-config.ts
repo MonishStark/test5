@@ -1,6 +1,7 @@
 /** @format */
 
 import type { CorsOptions } from "cors";
+import { sanitizeForLog } from "../shared/logger";
 
 /**
  * CORS Configuration for Production
@@ -61,8 +62,12 @@ const corsOrigin = (
 	if (!origin || allowedOrigins.indexOf(origin) !== -1) {
 		callback(null, true);
 	} else {
-		console.warn(`🚫 CORS blocked request from origin: ${origin}`);
-		callback(new Error(`Origin ${origin} not allowed by CORS policy`));
+		console.warn(
+			`🚫 CORS blocked request from origin: ${sanitizeForLog(origin)}`
+		);
+		callback(
+			new Error(`Origin ${sanitizeForLog(origin)} not allowed by CORS policy`)
+		);
 	}
 };
 

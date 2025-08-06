@@ -11,6 +11,7 @@ import path from "path";
 import fs from "fs";
 import { promises as fsPromises } from "fs";
 import { Request, Response, NextFunction } from "express";
+import crypto from "crypto";
 
 /**
  * Enhanced path validation with multiple security layers
@@ -252,6 +253,14 @@ export class InputSanitizer {
 		}
 
 		return jobId;
+	}
+
+	/**
+	 * Generate a secure, unique job ID
+	 * Centralized to maintain consistency across the application
+	 */
+	static generateJobId(): string {
+		return "job-" + crypto.randomUUID();
 	}
 }
 
