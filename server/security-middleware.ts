@@ -69,7 +69,9 @@ export const securityHeaders = (
 	// Content Security Policy
 	const csp = [
 		"default-src 'self'",
-		"script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Allow inline scripts for development
+		process.env.NODE_ENV === "development"
+			? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" // Allow inline scripts for development only
+			: "script-src 'self'",
 		"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
 		"font-src 'self' https://fonts.gstatic.com",
 		"img-src 'self' data: blob:",
