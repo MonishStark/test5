@@ -162,7 +162,7 @@ export function createStreamingUploader(
 				await ensureUploadDirectory(config.uploadDirectory);
 				cb(null, config.uploadDirectory);
 			} catch (error) {
-				cb(error as Error, ""); // skipcq: JS-0255
+				cb(error as Error, "Upload error"); // skipcq: JS-0255
 			}
 		},
 		filename: (req, file, cb) => {

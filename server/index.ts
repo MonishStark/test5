@@ -17,6 +17,9 @@ import { InputSanitizer } from "./security-utils.js";
 // Use simple job queue by default (no Redis dependency)
 import { jobQueueManager } from "./jobQueueSimple";
 
+// Constants
+const LOG_LINE_TRUNCATE_LENGTH = 79;
+
 const app = express();
 
 // Apply security headers first
@@ -60,9 +63,9 @@ app.use((req, res, next) => {
 				logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
 			}
 
-			if (logLine.length > 80) {
+			if (logLine.length > LOG_LINE_TRUNCATE_LENGTH + 1) {
 				// skipcq: JS-0246
-				logLine = logLine.slice(0, 79) + "…";
+				logLine = logLine.slice(0, LOG_LINE_TRUNCATE_LENGTH) + "…";
 			}
 
 			log(logLine);
