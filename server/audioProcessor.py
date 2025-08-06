@@ -34,6 +34,10 @@ logger = logging.getLogger(__name__)
 
 def install_package(package):
     """Install a package using pip if it's not already installed."""
+    allowed_packages = {"madmom", "spleeter"}
+    if package not in allowed_packages:
+        logger.error("Attempted to install disallowed package: %s", package)
+        raise ValueError(f"Package '{package}' is not allowed to be installed.")
     try:
         subprocess.check_call(
             [sys.executable, "-m", "pip", "install", package])

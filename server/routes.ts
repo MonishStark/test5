@@ -62,8 +62,8 @@ function validateFilePath(filePath: string, allowedDirectory: string): boolean {
 	try {
 		// Step 1: Canonicalize both paths to their absolute forms
 		// This resolves all relative components (., .., symlinks, etc.)
-		const canonicalFilePath = path.resolve(filePath); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
-		const canonicalBaseDirectory = path.resolve(allowedDirectory); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+		const canonicalFilePath = path.resolve(filePath);
+		const canonicalBaseDirectory = path.resolve(allowedDirectory);
 
 		// Step 2: Ensure the canonicalized file path starts with the canonicalized base directory
 		// This is the core defense against path traversal attacks
@@ -101,7 +101,7 @@ function validateFilePath(filePath: string, allowedDirectory: string): boolean {
 function validateAndCanonicalizeDirectory(dirPath: string): string {
 	try {
 		// Canonicalize the directory path
-		const canonicalPath = path.resolve(dirPath); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+		const canonicalPath = path.resolve(dirPath);
 
 		// Additional validation for directory paths
 		if (canonicalPath.includes("..") || canonicalPath.includes("~")) {
@@ -122,8 +122,8 @@ function secureFileOperation(
 ): boolean {
 	try {
 		// Canonicalize both paths
-		const canonicalFilePath = path.resolve(filePath); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
-		const canonicalBaseDir = path.resolve(baseDirectory); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+		const canonicalFilePath = path.resolve(filePath);
+		const canonicalBaseDir = path.resolve(baseDirectory);
 
 		// Verify the file is within the base directory
 		const isWithinBase =
@@ -141,7 +141,6 @@ function secureFileOperation(
 
 		return true;
 	} catch (error) {
-		// nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
 		logger.error(
 			`Security check failed for ${operation}`,
 			error instanceof Error ? error : new Error(String(error))
@@ -259,7 +258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 				if (!validateFilePath(req.file.path, normalizedUploadsDir)) {
 					// Clean up the invalid file asynchronously
 					try {
-						await fsPromises.unlink(req.file.path); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal
+						await fsPromises.unlink(req.file.path);
 						logger.info("Cleaned up invalid uploaded file", {
 							filePath: req.file.path,
 						});
@@ -397,7 +396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 					)
 				) {
 					try {
-						await fsPromises.unlink(track.originalPath); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal
+						await fsPromises.unlink(track.originalPath);
 						logger.info("Deleted original file", {
 							filePath: track.originalPath,
 						});
@@ -414,7 +413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 					for (const filePath of track.extendedPaths) {
 						if (secureFileOperation(filePath, normalizedResultDir, "delete")) {
 							try {
-								await fsPromises.unlink(filePath); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal
+								await fsPromises.unlink(filePath);
 								logger.info("Deleted extended file", { filePath });
 							} catch (error) {
 								logger.warn("Failed to delete extended file", {
@@ -492,8 +491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 			const outputFilename = `${sanitizedBaseName}_extended_v${
 				version + 1
 			}${fileExt}`;
-			const outputPath = path.join(normalizedResultDir, outputFilename); // nosemgrep: javascript.express.security.audit.express-path-join-resolve-traversal.express-path-join-resolve-traversal, javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
-
+			const outputPath = path.join(normalizedResultDir, outputFilename);
 			// Security: Validate the generated output path is within the results directory
 			if (!validateFilePath(outputPath, normalizedResultDir)) {
 				return res.status(500).json({
@@ -703,7 +701,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 			// Check if file exists and get stats asynchronously
 			let stat;
 			try {
-				stat = await fsPromises.stat(filePath); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal, javascript.express.express-fs-filename.express-fs-filename
+				stat = await fsPromises.stat(filePath);
 			} catch (statError) {
 				logger.warn("Failed to access audio file", {
 					filePath,
@@ -723,7 +721,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 				const start = parseInt(parts[0], 10);
 				const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
 				const chunksize = end - start + 1;
-				const file = fs.createReadStream(filePath, { start, end }); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal, javascript.express.express-fs-filename.express-fs-filename
+				const file = fs.createReadStream(filePath, { start, end });
 				const head = {
 					"Content-Range": `bytes ${start}-${end}/${fileSize}`,
 					"Accept-Ranges": "bytes",
@@ -738,7 +736,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 					"Content-Type": "audio/mpeg",
 				};
 				res.writeHead(200, head);
-				fs.createReadStream(filePath).pipe(res); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal, javascript.express.express-fs-filename.express-fs-filename
+				fs.createReadStream(filePath).pipe(res);
 			}
 		} catch (error) {
 			console.error("Stream audio error:", error);
@@ -803,7 +801,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 			// Check if extended file exists asynchronously
 			try {
-				await fsPromises.access(filePath); // nosemgrep: javascript.express.express-fs-filename.express-fs-filename
+				await fsPromises.access(filePath);
 			} catch (accessError) {
 				logger.warn("Extended audio file not accessible", {
 					filePath,
@@ -824,11 +822,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 			);
 
 			// Create download filename with version number
-			const downloadFilename = `${originalNameWithoutExt}_extended_v${
+			const downloadFilenameRaw = `${originalNameWithoutExt}_extended_v${
 				version + 1
 			}${path.extname(track.originalFilename)}`;
+			// Sanitize the download filename to prevent path traversal and unsafe characters
+			const downloadFilename = sanitizeFilename(downloadFilenameRaw);
 
-			res.download(filePath, downloadFilename); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal
+			res.download(filePath, downloadFilename);
 		} catch (error) {
 			console.error("Download error:", error);
 			return res.status(500).json({

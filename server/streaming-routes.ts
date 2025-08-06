@@ -294,8 +294,7 @@ router.delete("/upload/:uploadId", async (req: Request, res: Response) => {
 		}
 
 		// Clean up any temporary files
-		const tempPattern = path.join(normalizedUploadsDir, `${uploadId}_*`); // nosemgrep: javascript.express.security.audit.express-path-join-resolve-traversal.express-path-join-resolve-traversal, javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
-
+		const tempPattern = path.join(normalizedUploadsDir, `${uploadId}_*`);
 		try {
 			await streamProcessor.cleanup(tempPattern);
 		} catch (error) {

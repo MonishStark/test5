@@ -27,7 +27,7 @@ class Logger {
 	private minLogLevel: LogLevel;
 
 	constructor() {
-		this.isDevelopment = process.env.NODE_ENV !== "production";
+		this.isDevelopment = process.env.NODE_ENV === "development";
 		this.minLogLevel = this.isDevelopment ? LogLevel.DEBUG : LogLevel.INFO;
 	}
 

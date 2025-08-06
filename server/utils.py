@@ -20,10 +20,10 @@ import librosa
 import numpy as np
 from os import path
 from pydub import AudioSegment
-
+LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format=LOG_FORMAT
 )
 logger = logging.getLogger(__name__)
 

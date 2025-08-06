@@ -94,7 +94,7 @@ export class SecurePathValidator {
 
 		try {
 			// Canonicalize the path to resolve all relative components
-			const canonicalPath = path.resolve(inputPath); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+			const canonicalPath = path.resolve(inputPath);
 
 			// Verify the path is within allowed directories
 			const isWithinAllowedDir = Array.from(this.allowedDirectories).some(

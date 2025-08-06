@@ -320,7 +320,6 @@ class SimpleJobQueueManager {
 			console.log(`✅ Direct processing completed for track ${data.trackId}`);
 		} catch (error) {
 			console.error(
-				// nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
 				`❌ Direct processing failed for track ${sanitizeForLog(
 					data.trackId
 				)}:`,

@@ -198,8 +198,7 @@ export function createStreamingUploader(
 		filename: (req, file, cb) => {
 			// Generate unique filename to prevent conflicts
 			const uploadId = generateUploadId();
-			// skipcq: JS-0246
-			const uniqueSuffix = crypto.randomUUID();
+			const uniqueSuffix = crypto.randomBytes(16).toString("hex");
 			const sanitizedName = sanitizeFilename(file.originalname);
 			const ext = path.extname(sanitizedName);
 			const filename = `${uploadId}_${uniqueSuffix}${ext}`;
@@ -500,7 +499,6 @@ export class AudioFileStreamProcessor {
 		try {
 			await fs.unlink(filePath);
 		} catch (error) {
-			// nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
 			logger.warn("Failed to cleanup file", {
 				filePath,
 				error: error instanceof Error ? error.message : String(error),

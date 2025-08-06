@@ -100,7 +100,7 @@ export function setupJobQueueRoutes(app: Express) {
 				}${fileExt}`;
 				const resultDir =
 					process.env.RESULTS_DIR || path.join(process.cwd(), "results");
-				const outputPath = path.join(resultDir, outputFilename); // nosemgrep: javascript.express.security.audit.express-path-join-resolve-traversal.express-path-join-resolve-traversal, javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+				const outputPath = path.join(resultDir, outputFilename);
 
 				// Create job data object
 				const jobData = {
@@ -366,8 +366,7 @@ export function setupJobQueueRoutes(app: Express) {
 					}${fileExt}`;
 					const resultDir =
 						process.env.RESULTS_DIR || path.join(process.cwd(), "results");
-					const outputPath = path.join(resultDir, outputFilename); // nosemgrep: javascript.express.security.audit.express-path-join-resolve-traversal.express-path-join-resolve-traversal, javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
-
+					const outputPath = path.join(resultDir, outputFilename);
 					// Create job data object for bulk processing
 					const jobData = {
 						jobId: `audio_${trackId}_${Date.now()}_bulk`,
