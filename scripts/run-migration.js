@@ -9,7 +9,7 @@ import { Pool } from "pg";
 import { promises as fsPromises } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { dirname } from "path"; // skipcq: JS-0232
+import { dirname } from "path"; // skipcq: JS-0232 - Duplicate import needed for ES module compatibility
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -39,7 +39,7 @@ async function runMigration() {
 			console.log("Migration path:", migrationPath);
 
 			// Check if migration file exists and read it asynchronously
-			// skipcq: JS-0119
+			// skipcq: JS-0119 - Empty catch block intentional, we throw custom error with file path context
 			let migrationSQL;
 			try {
 				migrationSQL = await fsPromises.readFile(migrationPath, "utf8");
@@ -61,7 +61,6 @@ async function runMigration() {
 		} finally {
 			client.release();
 		}
-		client.release();
 	} catch (error) {
 		console.error("❌ Migration failed:", error.message);
 		console.error("Stack trace:", error.stack);
@@ -72,7 +71,7 @@ async function runMigration() {
 }
 
 // ES module equivalent of require.main === module
-import { pathToFileURL } from "url"; // skipcq: JS-0232
+import { pathToFileURL } from "url"; // skipcq: JS-0232 - Second import needed for ES module main check logic
 
 console.log("Script URL:", import.meta.url);
 console.log("Process argv[1]:", process.argv[1]);

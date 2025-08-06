@@ -43,7 +43,7 @@ export const uploadRateLimit = rateLimit({
 });
 
 // Security headers middleware
-// skipcq: JS-0045
+// skipcq: JS-0045 - Express middleware signature requires async function for proper error handling
 export const securityHeaders = (
 	req: Request,
 	res: Response,

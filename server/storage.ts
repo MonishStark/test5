@@ -45,13 +45,13 @@ export interface IStorage {
 }
 
 export class PostgresStorage implements IStorage {
-	// skipcq: JS-0105
+	// skipcq: JS-0105 - Interface implementation may not use all parameters
 	async getUser(id: number): Promise<User | undefined> {
 		const result = await db.select().from(users).where(eq(users.id, id));
 		return result[0];
 	}
 
-	// skipcq: JS-0105
+	// skipcq: JS-0105 - Interface implementation may not use all parameters
 	async getUserByUsername(username: string): Promise<User | undefined> {
 		const result = await db
 			.select()

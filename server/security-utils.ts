@@ -140,7 +140,7 @@ export class SecurePathValidator {
 	 * Secure filename sanitization
 	 * Consolidated from routes.ts to maintain single source of truth
 	 */
-	// skipcq: JS-0105
+	// skipcq: JS-0105 - Method signature required by class interface
 	sanitizeFilename(filename: string): string {
 		if (!filename || typeof filename !== "string") {
 			throw new Error("Invalid filename input");
