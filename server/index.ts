@@ -14,6 +14,7 @@ import {
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { InputSanitizer } from "./security-utils.js";
+import path from "path";
 // Use simple job queue by default (no Redis dependency)
 import { jobQueueManager } from "./jobQueueSimple";
 
@@ -114,8 +115,8 @@ app.use((req, res, next) => {
 			const jobData = {
 				jobId,
 				trackId,
-				originalPath: `./uploads/track-${trackId}.mp3`, // Adjust based on your file structure
-				outputPath: `./results/track-${trackId}-extended.mp3`,
+				originalPath: path.join("uploads", `track-${trackId}.mp3`), // Secure path construction
+				outputPath: path.join("results", `track-${trackId}-extended.mp3`),
 				settings,
 				userId: 1, // Placeholder
 				priority: settings.priority || 2,

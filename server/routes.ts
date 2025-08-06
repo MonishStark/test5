@@ -12,6 +12,7 @@ import { promises as fsPromises } from "fs";
 import { PythonShell } from "python-shell";
 import streamingRoutes from "./streaming-routes.js";
 import { SecurePathValidator, InputSanitizer } from "./security-utils.js";
+import crypto from "crypto";
 
 // Setup multer for file uploads with proper validation
 const uploadsDir =
@@ -117,7 +118,7 @@ const storage_config = multer.diskStorage({
 	// skipcq: JS-0240
 	filename: function (req, file, cb) {
 		// skipcq: JS-0246
-		const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+		const uniqueSuffix = crypto.randomBytes(16).toString("hex");
 		const sanitizedOriginalName = secureValidator.sanitizeFilename(
 			file.originalname
 		);
