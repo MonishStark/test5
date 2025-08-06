@@ -34,10 +34,10 @@ export function sanitizeForLog(input: unknown): string {
 
 	const strInput = typeof input === "string" ? input : String(input);
 
-	// Remove format specifiers, control characters, and non-printable characters
-	// that could be used for log injection or manipulation
+	// Remove all percent signs (to prevent format string attacks), control characters, and non-printable characters
+	// that could be used for log injection or manipulation. This is more robust than trying to match all possible format specifiers.
 	return strInput
-		.replace(/%([-+0# ]*\d*(?:\.\d+)?[a-zA-Z%])/gu, "") // Remove format specifiers
+		.replace(/%/gu, "") // Remove all percent signs to prevent format string attacks
 		.replace(/[\x00-\x1F\x7F]/gu, "") // Remove control characters for security, allow Unicode
 		.substring(0, 1000); // Limit length to prevent log flooding
 }

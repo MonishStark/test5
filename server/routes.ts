@@ -57,46 +57,6 @@ async function ensureDirectoriesExist(): Promise<void> {
 	}
 }
 
-// Security utility function to validate file paths and prevent path traversal
-function validateFilePath(filePath: string, allowedDirectory: string): boolean {
-	try {
-		// Step 1: Canonicalize both paths to their absolute forms
-		// This resolves all relative components (., .., symlinks, etc.)
-		const canonicalFilePath = path.resolve(filePath);
-		const canonicalBaseDirectory = path.resolve(allowedDirectory);
-
-		// Step 2: Ensure the canonicalized file path starts with the canonicalized base directory
-		// This is the core defense against path traversal attacks
-		const isWithinBaseDirectory =
-			canonicalFilePath.startsWith(canonicalBaseDirectory + path.sep) ||
-			canonicalFilePath === canonicalBaseDirectory;
-
-		// Step 3: Additional security checks for common bypass attempts
-		const containsDangerousPatterns =
-			filePath.includes("..") || // Directory traversal
-			filePath.includes("~") || // Home directory expansion
-			filePath.includes("\0") || // Null byte injection
-			filePath.includes("%00") || // URL encoded null byte
-			filePath.includes("%2e%2e") || // URL encoded ..
-			filePath.includes("%2f") || // URL encoded /
-			filePath.includes("%5c"); // URL encoded \
-
-		// Step 4: Verify the path doesn't contain any dangerous characters
-		const hasInvalidChars = /[<>"|*?]/.test(filePath);
-
-		return (
-			isWithinBaseDirectory && !containsDangerousPatterns && !hasInvalidChars
-		);
-	} catch (error) {
-		// If path resolution fails for any reason, deny access
-		logger.error(
-			"Path validation error during security check",
-			error instanceof Error ? error : new Error(String(error))
-		);
-		return false;
-	}
-}
-
 // Enhanced security function to validate and canonicalize directory paths
 function validateAndCanonicalizeDirectory(dirPath: string): string {
 	try {
@@ -257,7 +217,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 				}
 
 				// Security: Validate uploaded file path
-				if (!validateFilePath(req.file.path, normalizedUploadsDir)) {
+				if (
+					!secureValidator.validateFilePath(req.file.path, normalizedUploadsDir)
+				) {
 					// Clean up the invalid file asynchronously
 					try {
 						await fsPromises.unlink(req.file.path);
@@ -511,7 +473,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 			}${fileExt}`;
 			const outputPath = path.join(normalizedResultDir, outputFilename);
 			// Security: Validate the generated output path is within the results directory
-			if (!validateFilePath(outputPath, normalizedResultDir)) {
+			if (!secureValidator.validateFilePath(outputPath, normalizedResultDir)) {
 				return res.status(500).json({
 					message: "Error: Generated output path is invalid",
 				});
@@ -704,10 +666,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 			// Security: Enhanced path validation with canonicalization
 			const isUploadFile =
-				validateFilePath(filePath, normalizedUploadsDir) &&
+				secureValidator.validateFilePath(filePath, normalizedUploadsDir) &&
 				secureFileOperation(filePath, normalizedUploadsDir, "read");
 			const isResultFile =
-				validateFilePath(filePath, normalizedResultDir) &&
+				secureValidator.validateFilePath(filePath, normalizedResultDir) &&
 				secureFileOperation(filePath, normalizedResultDir, "read");
 
 			if (!isUploadFile && !isResultFile) {
@@ -809,7 +771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 			// Security: Enhanced path validation with canonicalization
 			if (
-				!validateFilePath(filePath, normalizedResultDir) ||
+				!secureValidator.validateFilePath(filePath, normalizedResultDir) ||
 				!secureFileOperation(filePath, normalizedResultDir, "download")
 			) {
 				return res

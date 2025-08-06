@@ -148,33 +148,6 @@ async function ensureUploadDirectory(uploadDir: string): Promise<void> {
 }
 
 /**
- * Security function to validate file paths and prevent path traversal
- * Integrates with existing security functions from routes.ts
- */
-function validateFilePath(filePath: string, allowedDirectory: string): boolean {
-	try {
-		const resolvedFilePath = path.resolve(filePath);
-		const resolvedAllowedDir = path.resolve(allowedDirectory);
-		const relative = path.relative(resolvedAllowedDir, resolvedFilePath);
-		// If relative path starts with '..' or contains '..' segments, it's outside allowedDirectory
-		if (
-			relative.startsWith(".." + path.sep) ||
-			relative === ".." ||
-			relative.split(path.sep).includes("..")
-		) {
-			return false;
-		}
-		return true;
-	} catch (error) {
-		logger.error(
-			"Path validation error",
-			error instanceof Error ? error : new Error(String(error))
-		);
-		return false;
-	}
-}
-
-/**
  * Create streaming upload middleware with progress tracking
  */
 export function createStreamingUploader(
@@ -347,7 +320,7 @@ export class AudioFileStreamProcessor {
 
 			// Validate file path for security
 			const normalizedUploadsDir = path.resolve(process.cwd(), "uploads");
-			if (!validateFilePath(filePath, normalizedUploadsDir)) {
+			if (!secureValidator.validateFilePath(filePath, normalizedUploadsDir)) {
 				throw new Error("Invalid file path");
 			}
 

@@ -168,6 +168,57 @@ export class SecurePathValidator {
 	}
 
 	/**
+	 * Security utility function to validate file paths and prevent path traversal
+	 * Consolidated from routes.ts and streaming-upload.ts to maintain single source of truth
+	 *
+	 * @param filePath - The file path to validate
+	 * @param allowedDirectory - The directory that the file path must be within
+	 * @returns true if the path is safe and within the allowed directory, false otherwise
+	 */
+	// skipcq: JS-0105
+	validateFilePath(filePath: string, allowedDirectory: string): boolean {
+		try {
+			// Step 1: Canonicalize both paths to their absolute forms
+			// This resolves all relative components (., .., symlinks, etc.)
+			const canonicalFilePath = path.resolve(filePath);
+			const canonicalBaseDirectory = path.resolve(allowedDirectory);
+
+			// Step 2: Ensure the canonicalized file path starts with the canonicalized base directory
+			// This is the core defense against path traversal attacks
+			const isWithinBaseDirectory =
+				canonicalFilePath.startsWith(canonicalBaseDirectory + path.sep) ||
+				canonicalFilePath === canonicalBaseDirectory;
+
+			// Step 3: Additional security checks for common bypass attempts
+			const containsDangerousPatterns =
+				filePath.includes("..") || // Directory traversal
+				filePath.includes("~") || // Home directory expansion
+				filePath.includes("\0") || // Null byte injection
+				filePath.includes("%00") || // URL encoded null byte
+				filePath.includes("%2e%2e") || // URL encoded ..
+				filePath.includes("%2f") || // URL encoded /
+				filePath.includes("%5c"); // URL encoded \
+
+			// Step 4: Verify the path doesn't contain any dangerous characters
+			const hasInvalidChars = /[<>"|*?]/.test(filePath);
+
+			return (
+				isWithinBaseDirectory && !containsDangerousPatterns && !hasInvalidChars
+			);
+		} catch (error) {
+			// If path resolution fails for any reason, deny access
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
+			// Note: We don't log the actual filePath for security reasons
+			console.error(
+				"Path validation error during security check:",
+				errorMessage
+			);
+			return false;
+		}
+	}
+
+	/**
 	 * Check if directory is writable
 	 */
 	// skipcq: JS-0105
