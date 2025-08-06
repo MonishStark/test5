@@ -62,11 +62,11 @@ app.use((req, res, next) => {
 	const start = Date.now();
 	const path = req.path;
 	// skipcq: JS-0126
-	let capturedJsonResponse: Record<string, unknown> | undefined = undefined;
+	let responseBody: Record<string, unknown> | undefined = undefined;
 
 	const originalResJson = res.json;
 	res.json = function (bodyJson, ...args) {
-		capturedJsonResponse = bodyJson;
+		responseBody = bodyJson;
 		return originalResJson.apply(res, [bodyJson, ...args]);
 	};
 
@@ -74,8 +74,8 @@ app.use((req, res, next) => {
 		const duration = Date.now() - start;
 		if (path.startsWith("/api")) {
 			let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-			if (capturedJsonResponse) {
-				logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+			if (responseBody) {
+				logLine += ` :: ${JSON.stringify(responseBody)}`;
 			}
 
 			if (logLine.length > LOG_LINE_TRUNCATE_LENGTH + 1) {

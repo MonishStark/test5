@@ -35,12 +35,27 @@ logger = logging.getLogger(__name__)
 try:
     import madmom
 except ImportError:
-    logger.error("The 'madmom' package is required but not installed. Please install it with 'pip install madmom' before running this script.")
+    logger.error(
+        "The 'madmom' package is required but not installed.\n"
+        "Install it with: pip install madmom\n"
+        "System requirements: 'ffmpeg' must be installed and available in your PATH.\n"
+        "On Ubuntu/Debian: sudo apt-get install ffmpeg\n"
+        "On MacOS (Homebrew): brew install ffmpeg\n"
+        "See https://madmom.readthedocs.io/en/latest/installation.html for details."
+    )
     raise
 try:
     from spleeter.separator import Separator
 except ImportError:
-    logger.error("The 'spleeter' package is required but not installed. Please install it with 'pip install spleeter' before running this script.")
+    logger.error(
+        "The 'spleeter' package is required but not installed.\n"
+        "Install it with: pip install spleeter\n"
+        "System requirements: 'ffmpeg' and 'tensorflow' must be installed.\n"
+        "On Ubuntu/Debian: sudo apt-get install ffmpeg\n"
+        "On MacOS (Homebrew): brew install ffmpeg\n"
+        "Install TensorFlow with: pip install tensorflow\n"
+        "See https://github.com/deezer/spleeter#installation for details."
+    )
     raise
 
 def detect_tempo_and_beats(audio_path, method="auto"):

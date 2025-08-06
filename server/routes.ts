@@ -118,7 +118,8 @@ const storage_config = multer.diskStorage({
 	// skipcq: JS-0240
 	filename: function (req, file, cb) {
 		// skipcq: JS-0246
-		const uniqueSuffix = crypto.randomBytes(16).toString("hex");
+		const uniqueSuffix =
+			Date.now() + "-" + crypto.randomBytes(16).toString("hex");
 		const sanitizedOriginalName = secureValidator.sanitizeFilename(
 			file.originalname
 		);
