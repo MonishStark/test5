@@ -361,7 +361,9 @@ export class AudioFileStreamProcessor {
 	 * Extract metadata using existing Python analysis pipeline
 	 * Integrates with utils.py for consistent audio analysis
 	 */
-	// skipcq: JS-0105
+	// skipcq: JS-0105 -- This method intentionally uses dynamic execution of a Python script (utils.py) via PythonShell
+	// to extract audio metadata, which may trigger static analysis warnings about dynamic code execution or subprocess usage.
+	// The approach is necessary to leverage existing Python-based audio analysis logic and maintain consistency across the stack.
 	private async extractMetadataStreaming(
 		filePath: string
 	): Promise<AudioMetadata> {

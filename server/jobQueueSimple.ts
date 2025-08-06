@@ -349,7 +349,14 @@ class SimpleJobQueueManager {
 
 			console.log("🐍 Running Python script:", args.join(" "));
 
-			const pythonProcess = spawn("python", args, {
+			const pythonExecutable = process.env.PYTHON_EXECUTABLE || "python";
+			if (pythonExecutable === "python") {
+				console.warn(
+					"[Security Warning] Using 'python' from PATH. Set the PYTHON_EXECUTABLE environment variable to specify an absolute path to the Python interpreter."
+				);
+			}
+
+			const pythonProcess = spawn(pythonExecutable, args, {
 				cwd: __dirname,
 				stdio: ["ignore", "pipe", "pipe"],
 			});
