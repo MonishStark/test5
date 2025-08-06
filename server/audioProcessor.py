@@ -32,34 +32,16 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger(__name__)
 
 
-def install_package(package):
-    """Install a package using pip if it's not already installed."""
-    allowed_packages = {"madmom", "spleeter"}
-    if package not in allowed_packages:
-        logger.error("Attempted to install disallowed package: %s", package)
-        raise ValueError(f"Package '{package}' is not allowed to be installed.")
-    try:
-        subprocess.check_call(
-            [sys.executable, "-m", "pip", "install", package])
-        logger.info("Successfully installed %s", package)
-    except Exception as e:
-        logger.error("Failed to install %s: %s", package, str(e))
-        raise
-
-
 try:
     import madmom
 except ImportError:
-    logger.info("madmom not found, attempting to install...")
-    install_package("madmom")
-    import madmom
-
+    logger.error("The 'madmom' package is required but not installed. Please install it with 'pip install madmom' before running this script.")
+    raise
 try:
     from spleeter.separator import Separator
 except ImportError:
-    logger.info("spleeter not found, attempting to install...")
-    install_package("spleeter")
-    from spleeter.separator import Separator
+    logger.error("The 'spleeter' package is required but not installed. Please install it with 'pip install spleeter' before running this script.")
+    raise
 
 def detect_tempo_and_beats(audio_path, method="auto"):
     logger.info("Detecting tempo and beats using %s method", method)

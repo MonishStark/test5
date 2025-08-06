@@ -20,6 +20,15 @@ import path from "path";
 import crypto from "crypto";
 import { logger } from "../shared/logger";
 import { PythonShell } from "python-shell";
+import { SecurePathValidator } from "./security-utils.js";
+
+// Initialize secure path validator for upload directories
+const allowedDirectories = [
+	path.resolve(process.cwd(), "uploads"),
+	path.resolve(process.cwd(), "uploads", "temp"),
+	path.resolve(process.cwd(), "results"),
+];
+const secureValidator = new SecurePathValidator(allowedDirectories);
 
 // Types for streaming upload
 interface StreamingUploadOptions {
@@ -166,18 +175,6 @@ function validateFilePath(filePath: string, allowedDirectory: string): boolean {
 }
 
 /**
- * Sanitize filename to prevent security issues
- * Uses same logic as existing routes.ts
- */
-function sanitizeFilename(filename: string): string {
-	return filename
-		.replace(/[<>:"/\\|?*\0]/g, "") // Remove filesystem-dangerous characters
-		.replace(/\.\./g, "") // Remove path traversal attempts
-		.replace(/^\.+/, "") // Remove leading dots
-		.slice(0, 255); // Limit filename length
-}
-
-/**
  * Create streaming upload middleware with progress tracking
  */
 export function createStreamingUploader(
@@ -199,7 +196,7 @@ export function createStreamingUploader(
 			// Generate unique filename to prevent conflicts
 			const uploadId = generateUploadId();
 			const uniqueSuffix = crypto.randomBytes(16).toString("hex");
-			const sanitizedName = sanitizeFilename(file.originalname);
+			const sanitizedName = secureValidator.sanitizeFilename(file.originalname);
 			const ext = path.extname(sanitizedName);
 			const filename = `${uploadId}_${uniqueSuffix}${ext}`;
 

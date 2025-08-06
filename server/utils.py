@@ -15,14 +15,15 @@ Run the script from the command line with a file path, and it outputs JSON-forma
 import sys
 import json
 import logging
-
+import os
 import librosa
 import numpy as np
 from os import path
 from pydub import AudioSegment
-LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+LOG_FORMAT = os.environ.get("LOG_FORMAT", "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, LOG_LEVEL, logging.INFO),
     format=LOG_FORMAT
 )
 logger = logging.getLogger(__name__)

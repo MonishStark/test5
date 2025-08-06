@@ -149,15 +149,6 @@ function secureFileOperation(
 	}
 }
 
-// Security function to sanitize filename
-function sanitizeFilename(filename: string): string {
-	// Remove dangerous characters and path traversal attempts
-	return filename
-		.replace(/[<>:"/\\|?*\0]/g, "") // Remove filesystem-dangerous characters
-		.replace(/\.\./g, "") // Remove path traversal attempts
-		.replace(/^\.+/, "") // Remove leading dots
-		.slice(0, 255); // Limit filename length
-}
 const storage_config = multer.diskStorage({
 	// skipcq: JS-0240
 	destination: function (req, file, cb) {
@@ -167,7 +158,9 @@ const storage_config = multer.diskStorage({
 	filename: function (req, file, cb) {
 		// skipcq: JS-0246
 		const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-		const sanitizedOriginalName = sanitizeFilename(file.originalname);
+		const sanitizedOriginalName = secureValidator.sanitizeFilename(
+			file.originalname
+		);
 		const extension = path.extname(sanitizedOriginalName);
 		cb(null, uniqueSuffix + extension);
 	},
@@ -487,7 +480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 			);
 			const fileExt = path.extname(track.originalFilename);
 			const version = (track.extendedPaths as string[])?.length || 0;
-			const sanitizedBaseName = sanitizeFilename(outputBase);
+			const sanitizedBaseName = secureValidator.sanitizeFilename(outputBase);
 			const outputFilename = `${sanitizedBaseName}_extended_v${
 				version + 1
 			}${fileExt}`;
@@ -826,7 +819,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 				version + 1
 			}${path.extname(track.originalFilename)}`;
 			// Sanitize the download filename to prevent path traversal and unsafe characters
-			const downloadFilename = sanitizeFilename(downloadFilenameRaw);
+			const downloadFilename =
+				secureValidator.sanitizeFilename(downloadFilenameRaw);
 
 			res.download(filePath, downloadFilename);
 		} catch (error) {

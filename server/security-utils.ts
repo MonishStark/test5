@@ -137,6 +137,7 @@ export class SecurePathValidator {
 
 	/**
 	 * Secure filename sanitization
+	 * Consolidated from routes.ts and streaming-upload.ts to maintain single source of truth
 	 */
 	// skipcq: JS-0105
 	sanitizeFilename(filename: string): string {
@@ -145,12 +146,12 @@ export class SecurePathValidator {
 		}
 
 		return filename
-			.replace(/[<>:"/\\|?*\0]/g, "") // Remove dangerous characters
+			.replace(/[<>:"/\\|?*\0]/g, "") // Remove filesystem-dangerous characters
 			.replace(/\.\./g, "") // Remove path traversal attempts
 			.replace(/^\.+/, "") // Remove leading dots
-			.replace(/\s+/g, "_") // Replace spaces with underscores
-			.slice(0, 255) // Limit filename length
-			.trim();
+			.replace(/\s+/g, "_") // Replace spaces with underscores for better compatibility
+			.slice(0, 255) // Limit filename length to filesystem limits
+			.trim(); // Remove any trailing whitespace
 	}
 
 	/**
