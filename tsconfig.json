@@ -1,0 +1,58 @@
+{
+	// TypeScript Configuration for Music DJ Feature Application
+	//
+	// This configuration ensures type safety across the entire full-stack application,
+	// including React frontend, Express backend, and shared type definitions.
+
+	// Include all TypeScript files across the project structure
+	"include": [
+		"client/src/**/*", // React frontend source files
+		"shared/**/*", // Shared types and schemas between client/server
+		"server/**/*" // Express.js backend source files
+	],
+
+	// Exclude directories that don't need compilation
+	"exclude": [
+		"node_modules", // Third-party dependencies
+		"build", // Legacy build directory
+		"dist", // Vite build output
+		"**/*.test.ts" // Test files (if any)
+	],
+
+	"compilerOptions": {
+		// Performance and caching options
+		"incremental": true, // Enable incremental compilation for faster rebuilds
+		"tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo", // Cache file location for incremental builds
+
+		// Compilation mode
+		"noEmit": true, // Don't emit JS files (Vite handles compilation)
+		"target": "ES2020", // Target ES2020 for Map/Set iteration support
+
+		// Module system configuration
+		"module": "ESNext", // Use modern ES modules for tree-shaking
+		"moduleResolution": "bundler", // Use bundler-aware module resolution
+		"esModuleInterop": true, // Enable CommonJS/ES module interoperability
+		"allowImportingTsExtensions": true, // Allow importing .ts files directly
+		"downlevelIteration": true, // Enable Map/Set iteration support
+
+		// Type checking strictness
+		"strict": true, // Enable all strict type checking options
+		"skipLibCheck": true, // Skip type checking of declaration files for faster builds
+
+		// Runtime libraries
+		"lib": ["ES2020", "dom", "dom.iterable"], // Include modern JS, DOM, and iteration APIs
+
+		// React configuration
+		"jsx": "preserve", // Preserve JSX for Vite to transform
+
+		// Path resolution
+		"baseUrl": ".", // Set base URL for relative imports
+		"types": ["node", "vite/client"], // Include Node.js and Vite type definitions
+
+		// Path mapping for clean imports (matches Vite aliases)
+		"paths": {
+			"@/*": ["./client/src/*"], // Client source alias
+			"@shared/*": ["./shared/*"] // Shared types alias
+		}
+	}
+}
