@@ -69,6 +69,13 @@ except ImportError:
     raise
 
 def detect_tempo_and_beats(audio_path, method="auto"):
+    """Detects the tempo and beats in an audio file using specified methods.
+    Parameters:
+        audio_path (str): Path to the audio file.
+        method (str): Method to use for beat detection ('librosa', 'madmom', or 'auto').
+        Returns:
+        tuple: (tempo, beat_times) where tempo is in BPM and beat_times is a list of beat times in seconds.
+    """
     logger.info("Detecting tempo and beats using %s method", method)
 
     if method in ("librosa", "auto"):
@@ -110,6 +117,14 @@ def detect_tempo_and_beats(audio_path, method="auto"):
     return None, None
 
 def separate_audio_components(audio_path, output_dir):
+    """Separates audio into stems using Spleeter.
+    Parameters:
+        audio_path (str): Path to the input audio file.
+        output_dir (str): Directory to save the separated stems.
+    Returns:
+        list: A list of paths to the separated audio components (vocals, drums, bass
+        other).
+    """
     logger.info("Starting audio separation with Spleeter")
 
     try:
@@ -140,6 +155,15 @@ def separate_audio_components(audio_path, output_dir):
         return None
 
 def pick_loudest_bars(stem, beats_ms, bars=DEFAULT_BARS_COUNT, beats_per_bar=DEFAULT_BEATS_PER_BAR):
+    """Picks the loudest segment of the audio stem based on beat positions.
+    Parameters:
+        stem (AudioSegment): The audio segment to analyze.
+        beats_ms (list): List of beat times in milliseconds.
+        bars (int): Number of bars to consider for the segment.
+        beats_per_bar (int): Number of beats per bar.
+    Returns:
+        AudioSegment: The loudest segment of the stem.
+    """
     total_beats = len(beats_ms)
     window = beats_per_bar * bars
     max_rms = -1
@@ -159,6 +183,19 @@ def pick_loudest_bars(stem, beats_ms, bars=DEFAULT_BARS_COUNT, beats_per_bar=DEF
     return stem[start_ms:end_ms]
 
 def create_extended_mix(components, output_path, intro_bars, outro_bars, _preserve_vocals, _tempo, beat_times, main_song):
+    """Creates an extended mix with shuffled intro and outro sections.
+    Parameters:
+        components (list): List of audio components (vocals, drums, bass, other).
+        output_path (str): Path to save the extended mix.
+        intro_bars (int): Number of bars for the intro section.
+        outro_bars (int): Number of bars for the outro section.
+        _preserve_vocals (bool): Whether to preserve vocals in the mix.
+        _tempo (float): Detected tempo in BPM.
+        beat_times (list): List of beat times in seconds.
+        main_song (AudioSegment): The main song segment to append.
+    Returns:
+        bool: True if the mix was created successfully, False otherwise.
+    """
     logger.info(
         "Creating extended mix with %s bars intro and %s bars outro", intro_bars, outro_bars)
 
@@ -217,7 +254,17 @@ def create_extended_mix(components, output_path, intro_bars, outro_bars, _preser
 
 
 def process_audio(input_path, output_path, intro_bars=16, outro_bars=16, preserve_vocals=True, beat_detection="auto"):
-
+    """Processes the input audio file to create an extended mix with shuffled intro and outro.
+    Parameters:
+        input_path (str): Path to the input audio file.
+        output_path (str): Path to save the extended mix.
+        intro_bars (int): Number of bars for the intro section.
+        outro_bars (int): Number of bars for the outro section.
+        preserve_vocals (bool): Whether to preserve vocals in the mix.
+        beat_detection (str): Method for beat detection (e.g., "auto", "manual").
+    Returns:
+        bool: True if the mix was created successfully, False otherwise.
+    """
     logger.info("Starting audio processing: %s", input_path)
     logger.info(
         "Parameters: intro_bars=%s, outro_bars=%s, preserve_vocals=%s, beat_detection=%s", 

@@ -29,7 +29,17 @@ class LogFormat(Enum):
     SIMPLE = "%(asctime)s %(levelname)s %(message)s"
 
 def get_log_format():
-    """Get log format from environment with validation against enum values"""
+    """
+    Retrieves the log format string from the environment variable LOG_FORMAT_TYPE,
+    validates it against the secure LogFormat enum values, and returns the corresponding format.
+    This function helps prevent injection attacks by only allowing predefined log formats.
+    Parameters:
+        None
+    Returns:
+        str: A validated log format string from the LogFormat enum. If the environment
+             variable is not set or invalid, returns the default log format.
+    """
+    
     env_format = os.environ.get("LOG_FORMAT_TYPE", "DEFAULT").upper()
     try:
         return LogFormat[env_format].value
@@ -55,27 +65,79 @@ logger = logging.getLogger(__name__)
 
 
 def get_audio_format(file_path):
+    """
+    Extracts the audio file format from the given file path.
+    
+    Parameters:
+        file_path (str): The path to the audio file.
+    
+    Returns:
+        str: The file extension (audio format) in lowercase, without the leading dot.
+    """
     return path.splitext(file_path)[1][1:].lower()
 
 
 def get_audio_data(file_path):
+    """
+    Load audio data from a file using librosa.
+    Parameters:
+        file_path (str): Path to the audio file.
+    Returns:
+        tuple: (audio_array, sample_rate) where audio_array is a numpy array of the audio time series,
+               and sample_rate is the sampling rate of the audio file.
+    """
     return librosa.load(file_path, sr=None)
 
 
 def get_audio_duration(audio_array, sample_rate):
+    """
+    Computes the duration of an audio signal.
+    Parameters:
+        audio_array (np.ndarray): Audio time series data.
+        sample_rate (int): Sampling rate of the audio.
+    Returns:
+        float: Duration of the audio in seconds.
+    """
     return librosa.get_duration(y=audio_array, sr=sample_rate)
 
 
 def get_audio_bitrate(audio):
+    """
+    Computes the bitrate of an audio file.
+    Parameters:
+        audio (AudioSegment): The audio segment object.
+    Returns:
+        int: Bitrate of the audio in kbps.
+    """
     return audio.frame_rate * audio.sample_width * audio.channels * 8
 
 
 def get_audio_tempo(audio_array, sample_rate):
+    """
+    Detects the tempo (beats per minute, BPM) of an audio signal using librosa.
+    
+    Parameters:
+        audio_array (np.ndarray): Audio time series data.
+        sample_rate (int): Sampling rate of the audio.
+    
+    Returns:
+        float: Estimated tempo in BPM.
+    """
     onset_env = librosa.onset.onset_strength(y=audio_array, sr=sample_rate)
     return librosa.beat.tempo(onset_envelope=onset_env, sr=sample_rate)[0]
 
 
 def detect_key(audio_array, sample_rate):
+    """
+    Detects the musical key of an audio signal using chroma features.
+    
+    Parameters:
+        audio_array (np.ndarray): Audio time series data.
+        sample_rate (int): Sampling rate of the audio.
+    
+    Returns:
+        str: Detected musical key and type (e.g., "C major", "A minor").
+    """
     chroma = librosa.feature.chroma_cqt(y=audio_array, sr=sample_rate)
     chroma_sum = np.sum(chroma, axis=1)
     key_idx = np.argmax(chroma_sum)
@@ -93,6 +155,14 @@ def detect_key(audio_array, sample_rate):
 
 
 def analyze_audio_file(file_path):
+    """
+    Analyzes an audio file and extracts metadata including format, duration, BPM, key, and
+    bitrate.
+    Parameters:
+        file_path (str): Path to the audio file.
+    Returns:
+        dict: A dictionary containing the audio metadata.
+    """
     logger.info("Analyzing audio file: %s", file_path)
 
     try:
@@ -125,6 +195,14 @@ def analyze_audio_file(file_path):
 
 
 def fallback_audio_analysis(file_path):
+    """
+    Fallback analysis for audio files that failed the primary analysis.
+    This function attempts to load the audio file using pydub and extract basic metadata.
+    Parameters:
+        file_path (str): Path to the audio file.
+    Returns:
+        dict: A dictionary containing basic audio metadata.
+    """
     try:
         audio = AudioSegment.from_file(file_path)
         format_type = get_audio_format(file_path)
@@ -150,6 +228,12 @@ def fallback_audio_analysis(file_path):
 
 
 def is_valid_filepath(file_path):
+    """Checks if the provided file path exists and is a valid file.
+    Parameters:
+        file_path (str): The path to the file to check.
+    Returns:
+        bool: True if the file exists, False otherwise.
+    """
     return path.exists(file_path)
 
 
