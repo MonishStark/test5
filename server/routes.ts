@@ -24,7 +24,19 @@ const resultDir =
 	process.env.RESULTS_DIR || path.join(process.cwd(), "results");
 
 // Configuration constants
-const MAX_VERSION_LIMIT = parseInt(process.env.MAX_VERSION_LIMIT || "3", 10);
+function parsePositiveIntEnv(varName: string, defaultValue: number): number {
+	const value = process.env[varName];
+	const parsed = parseInt(value ?? String(defaultValue), 10);
+	if (isNaN(parsed) || parsed < 1) {
+		logger.error(
+			`Invalid value for environment variable ${varName}: "${value}". Using default: ${defaultValue}`
+		);
+		return defaultValue;
+	}
+	return parsed;
+}
+
+const MAX_VERSION_LIMIT = parsePositiveIntEnv("MAX_VERSION_LIMIT", 3);
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || "15728640", 10); // 15MB default
 
 // Initialize security components
