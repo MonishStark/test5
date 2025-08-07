@@ -37,7 +37,7 @@ export function sanitizeForLog(input: unknown): string {
 	// Remove control characters and non-printable characters that could be used for log injection or manipulation.
 	// Percent signs are preserved to allow legitimate formatting in log messages.
 	return strInput
-		.replace(/[\x00-\x1F\x7F]/gu, "") // Remove control characters in one pass
+		.replace(/\p{C}/gu, "") // Remove all Unicode control characters in one pass
 		.substring(0, 1000); // Limit length to prevent log flooding
 }
 

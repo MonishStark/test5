@@ -63,7 +63,7 @@ app.use((req, res, next) => {
 
 			if (logLine.length > LOG_LINE_TRUNCATE_LENGTH + 1) {
 				// skipcq: JS-0246
-				logLine = logLine.slice(0, LOG_LINE_TRUNCATE_LENGTH) + "…";
+				logLine = logLine.slice(0, LOG_LINE_TRUNCATE_LENGTH) + "...";
 			}
 
 			log(logLine);
