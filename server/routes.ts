@@ -10,7 +10,11 @@ import path from "path";
 import fs from "fs";
 import { promises as fsPromises } from "fs";
 import { PythonShell } from "python-shell";
-import { SecurePathValidator, InputSanitizer } from "./security-utils.js";
+import {
+	SecurePathValidator,
+	sanitizeIntParam,
+	sanitizeStringParam,
+} from "./security-utils.js";
 import crypto from "crypto";
 
 // Setup multer for file uploads with proper validation
@@ -352,11 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 	app.get("/api/tracks/:id", async (req: Request, res: Response) => {
 		try {
 			// Enhanced security: Validate and sanitize ID parameter
-			const id = InputSanitizer.sanitizeIntParam(
-				req.params.id,
-				1,
-				Number.MAX_SAFE_INTEGER
-			);
+			const id = sanitizeIntParam(req.params.id, 1, Number.MAX_SAFE_INTEGER);
 			if (id === null) {
 				return res.status(400).json({
 					message: "Invalid track ID: must be a positive integer",
@@ -463,11 +463,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 	app.post("/api/tracks/:id/process", async (req: Request, res: Response) => {
 		try {
 			// Enhanced security: Validate and sanitize ID parameter
-			const id = InputSanitizer.sanitizeIntParam(
-				req.params.id,
-				1,
-				Number.MAX_SAFE_INTEGER
-			);
+			const id = sanitizeIntParam(req.params.id, 1, Number.MAX_SAFE_INTEGER);
 			if (id === null) {
 				return res.status(400).json({
 					message: "Invalid track ID: must be a positive integer",
@@ -608,11 +604,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 	app.get("/api/tracks/:id/status", async (req: Request, res: Response) => {
 		try {
 			// Enhanced security: Validate and sanitize ID parameter
-			const id = InputSanitizer.sanitizeIntParam(
-				req.params.id,
-				1,
-				Number.MAX_SAFE_INTEGER
-			);
+			const id = sanitizeIntParam(req.params.id, 1, Number.MAX_SAFE_INTEGER);
 			if (id === null) {
 				return res.status(400).json({
 					message: "Invalid track ID: must be a positive integer",
@@ -640,11 +632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 	app.get("/api/audio/:id/:type", async (req: Request, res: Response) => {
 		try {
 			// Enhanced security: Validate and sanitize ID parameter
-			const id = InputSanitizer.sanitizeIntParam(
-				req.params.id,
-				1,
-				Number.MAX_SAFE_INTEGER
-			);
+			const id = sanitizeIntParam(req.params.id, 1, Number.MAX_SAFE_INTEGER);
 			if (id === null) {
 				return res.status(400).json({
 					message: "Invalid track ID: must be a positive integer",
@@ -652,7 +640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 			}
 
 			// Enhanced security: Validate and sanitize type parameter
-			const type = InputSanitizer.sanitizeStringParam(req.params.type, [
+			const type = sanitizeStringParam(req.params.type, [
 				"original",
 				"extended",
 			]);
@@ -669,11 +657,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 			if (type === "extended") {
 				// Enhanced security: Validate version parameter
 				const version =
-					InputSanitizer.sanitizeIntParam(
-						req.query.version as string,
-						0,
-						100
-					) || 0;
+					sanitizeIntParam(req.query.version as string, 0, 100) || 0;
 				const extendedPaths = Array.isArray(track.extendedPaths)
 					? track.extendedPaths
 					: [];
@@ -773,11 +757,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 	app.get("/api/tracks/:id/download", async (req: Request, res: Response) => {
 		try {
 			// Enhanced security: Validate and sanitize ID parameter
-			const id = InputSanitizer.sanitizeIntParam(
-				req.params.id,
-				1,
-				Number.MAX_SAFE_INTEGER
-			);
+			const id = sanitizeIntParam(req.params.id, 1, Number.MAX_SAFE_INTEGER);
 			if (id === null) {
 				return res.status(400).json({
 					message: "Invalid track ID: must be a positive integer",
@@ -791,8 +771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 			// Enhanced security: Validate version parameter
 			const version =
-				InputSanitizer.sanitizeIntParam(req.query.version as string, 0, 100) ||
-				0;
+				sanitizeIntParam(req.query.version as string, 0, 100) || 0;
 			const extendedPaths = Array.isArray(track.extendedPaths)
 				? track.extendedPaths
 				: [];

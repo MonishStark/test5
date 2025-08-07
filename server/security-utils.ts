@@ -235,84 +235,82 @@ export class SecurePathValidator {
 /**
  * Input sanitization utilities
  */
-// skipcq: JS-0327
-export class InputSanitizer {
-	/**
-	 * Sanitize and validate integer parameters
-	 */
-	static sanitizeIntParam(
-		value: unknown,
-		min?: number,
-		max?: number
-	): number | null {
-		const parsed = parseInt(String(value), 10);
 
-		if (isNaN(parsed)) {
-			return null;
-		}
+/**
+ * Sanitize and validate integer parameters
+ */
+export function sanitizeIntParam(
+	value: unknown,
+	min?: number,
+	max?: number
+): number | null {
+	const parsed = parseInt(String(value), 10);
 
-		if (min !== undefined && parsed < min) {
-			return null;
-		}
-
-		if (max !== undefined && parsed > max) {
-			return null;
-		}
-
-		return parsed;
+	if (isNaN(parsed)) {
+		return null;
 	}
 
-	/**
-	 * Sanitize string parameters
-	 */
-	static sanitizeStringParam(
-		value: unknown,
-		allowedValues?: string[],
-		maxLength = 1000
-	): string | null {
-		if (typeof value !== "string") {
-			return null;
-		}
-
-		if (value.length > maxLength) {
-			return null;
-		}
-
-		// Remove potential XSS and injection attempts
-		const sanitized = value.replace(/[<>"\0]/g, "").trim();
-
-		if (allowedValues && !allowedValues.includes(sanitized)) {
-			return null;
-		}
-
-		return sanitized || null;
+	if (min !== undefined && parsed < min) {
+		return null;
 	}
 
-	/**
-	 * Validate job ID format (alphanumeric with specific format)
-	 */
-	static validateJobId(jobId: unknown): string | null {
-		if (typeof jobId !== "string") {
-			return null;
-		}
-
-		// Job IDs should be alphanumeric, possibly with hyphens/underscores
-		const jobIdPattern = /^[a-zA-Z0-9\-_]{1,64}$/;
-
-		if (!jobIdPattern.test(jobId)) {
-			return null;
-		}
-
-		return jobId;
+	if (max !== undefined && parsed > max) {
+		return null;
 	}
 
-	/**
-	 * Generate a secure, unique job ID
-	 * Centralized to maintain consistency across the application
-	 */
-	static generateJobId(): string {
-		return "job-" + crypto.randomUUID();
+	return parsed;
+}
+
+/**
+ * Sanitize string parameters
+ */
+export function sanitizeStringParam(
+	value: unknown,
+	allowedValues?: string[],
+	maxLength = 1000
+): string | null {
+	if (typeof value !== "string") {
+		return null;
 	}
+
+	if (value.length > maxLength) {
+		return null;
+	}
+
+	// Remove potential XSS and injection attempts
+	const sanitized = value.replace(/[<>"\0]/g, "").trim();
+
+	if (allowedValues && !allowedValues.includes(sanitized)) {
+		return null;
+	}
+
+	return sanitized || null;
+}
+
+/**
+ * Validate job ID format (alphanumeric with specific format)
+ */
+export function validateJobId(jobId: unknown): string | null {
+	if (typeof jobId !== "string") {
+		return null;
+	}
+
+	// Job IDs should be alphanumeric, possibly with hyphens/underscores
+	const jobIdPattern = /^[a-zA-Z0-9\-_]{1,64}$/;
+
+	if (!jobIdPattern.test(jobId)) {
+		return null;
+	}
+
+	return jobId;
+}
+
+/**
+ * Generate a secure, unique job ID
+ * Centralized to maintain consistency across the application
+ */
+export function generateJobId(): string {
+	return "job-" + crypto.randomUUID();
 }
 
 /**

@@ -108,11 +108,6 @@ export default defineConfig(({ command }) => {
 						utils: ["clsx", "class-variance-authority", "tailwind-merge"],
 					},
 				},
-				// External dependencies that should not be bundled
-				external: () => {
-					// Keep all dependencies internal for now to avoid runtime issues
-					return false;
-				},
 				// Tree shaking optimization
 				treeshake: {
 					moduleSideEffects: false,
