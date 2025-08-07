@@ -11,13 +11,14 @@ import { nanoid } from "nanoid";
 const viteLogger = createLogger();
 
 export function log(_message: string, _source = "express") {
-	//Placeholder logging function - formatted time available if needed
 	const formattedTime = new Date().toLocaleTimeString("en-US", {
 		hour: "numeric",
 		minute: "2-digit",
 		second: "2-digit",
 		hour12: true,
 	});
+	const logMsg = `[${formattedTime}] [${_source}] ${_message}`;
+	viteLogger.info(logMsg);
 }
 
 export async function setupVite(app: Express, server: Server) {
