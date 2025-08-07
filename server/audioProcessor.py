@@ -27,6 +27,9 @@ import subprocess
 import logging
 import random
 
+# Create a module-level cryptographically secure random generator for efficiency
+secure_random = random.SystemRandom()
+
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -194,7 +197,7 @@ def create_extended_mix(components, output_path, intro_bars, outro_bars, _preser
         intro_segments = [full_intro_drums,
                           full_intro_other, full_intro_drums, intro_vocals]
         intro_zipped = list(zip(intro_labels, intro_segments))
-        random.SystemRandom().shuffle(intro_zipped)
+        secure_random.shuffle(intro_zipped)
         intro_components = [seg for (_, seg) in intro_zipped]
         shuffled_intro_order = [label for (label, _) in intro_zipped]
 

@@ -273,9 +273,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 				const scriptPath = path.resolve(scriptDir, scriptName);
 
 				// Validate that the script is within the expected directory
+				// Ensure scriptPath is inside scriptDir and is the expected script file
+				const relativeScriptPath = path.relative(scriptDir, scriptPath);
 				if (
-					!scriptPath.startsWith(scriptDir + path.sep) &&
-					scriptPath !== scriptDir // handle case where scriptDir is the scriptPath
+					relativeScriptPath.startsWith("..") ||
+					path.isAbsolute(relativeScriptPath) ||
+					path.basename(scriptPath) !== scriptName
 				) {
 					logger.error(
 						"Attempted to execute script outside of allowed directory",
@@ -283,6 +286,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 						{
 							scriptPath,
 							allowedDir: scriptDir,
+							relativePath: relativeScriptPath,
+							expectedScriptName: scriptName,
 						}
 					);
 					return res.status(500).json({ message: "Internal server error" });

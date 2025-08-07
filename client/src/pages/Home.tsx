@@ -25,7 +25,8 @@ const Home: React.FC = () => {
 	const { toast } = useToast();
 	const [currentTrackId, setCurrentTrackId] = useState<number | null>(() => {
 		const saved = localStorage.getItem("currentTrackId");
-		return saved ? parseInt(saved, 10) : null;
+		const parsed = saved ? parseInt(saved, 10) : NaN;
+		return !isNaN(parsed) && parsed > 0 ? parsed : null;
 	});
 	const [isProcessing, setIsProcessing] = useState(() => {
 		return localStorage.getItem("isProcessing") === "true";
