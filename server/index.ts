@@ -113,7 +113,7 @@ app.use((req, res, next) => {
 		await serveStatic(app);
 	}
 
-	const port = 5000;
+	const port = process.env.PORT ? Number(process.env.PORT) : 5000;
 	server.listen(
 		{
 			port,
