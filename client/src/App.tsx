@@ -1,3 +1,5 @@
+/** @format */
+
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -9,29 +11,29 @@ import AppHeader from "@/components/AppHeader";
 import Footer from "@/components/Footer";
 
 function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route component={NotFound} />
-    </Switch>
-  );
+	return (
+		<Switch>
+			<Route path='/' component={Home} />
+			<Route component={NotFound} />
+		</Switch>
+	);
 }
 
 function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <div className="flex flex-col min-h-screen">
-          <AppHeader title="DJ Mix Extender" />
-          <main className="flex-grow">
-            <Router />
-          </main>
-          <Footer />
-          <Toaster />
-        </div>
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
+	return (
+		<QueryClientProvider client={queryClient}>
+			<TooltipProvider>
+				<div className='flex flex-col min-h-screen'>
+					<AppHeader title='DJ Mix Extender' />
+					<main className='flex-grow'>
+						<Router />
+					</main>
+					<Footer />
+					<Toaster />
+				</div>
+			</TooltipProvider>
+		</QueryClientProvider>
+	);
 }
 
 export default App;

@@ -64,14 +64,14 @@ export class SecurePathValidator {
 	/**
 	 * Comprehensive path validation with multiple security checks
 	 */
-	validatePath(
+	async validatePath(
 		inputPath: string,
 		operationType: "read" | "write" = "read"
-	): {
+	): Promise<{
 		isValid: boolean;
 		sanitizedPath?: string;
 		errors: string[];
-	} {
+	}> {
 		const errors: string[] = [];
 
 		// Basic input validation
@@ -115,7 +115,7 @@ export class SecurePathValidator {
 			// Additional validation for write operations
 			if (operationType === "write") {
 				const parentDir = path.dirname(canonicalPath);
-				if (!this.isDirectoryWritable(parentDir)) {
+				if (!(await this.isDirectoryWritable(parentDir))) {
 					errors.push("Parent directory is not writable");
 					return { isValid: false, errors };
 				}
@@ -324,7 +324,11 @@ export function createSecurityMiddleware(validator: SecurePathValidator) {
 		 * Validate file paths in requests
 		 */
 		// skipcq: JS-0045
-		validateFilePaths: (req: Request, res: Response, next: NextFunction) => {
+		validateFilePaths: async (
+			req: Request,
+			res: Response,
+			next: NextFunction
+		) => {
 			// Check for file paths in common request locations
 			const pathsToCheck = [
 				req.body.filePath,
@@ -334,7 +338,7 @@ export function createSecurityMiddleware(validator: SecurePathValidator) {
 			].filter(Boolean);
 
 			for (const pathToCheck of pathsToCheck) {
-				const validation = validator.validatePath(pathToCheck);
+				const validation = await validator.validatePath(pathToCheck);
 				if (!validation.isValid) {
 					return res.status(400).json({
 						message: "Invalid file path",

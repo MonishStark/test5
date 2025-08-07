@@ -267,16 +267,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
 					userId: demoUser.id, // Using demo user for now
 				});
 
-				// Get basic audio info using Python
+				// Get basic audio info using Python - with security validation
+				const scriptDir = path.join(process.cwd(), "server");
+				const scriptName = "utils.py";
+				const scriptPath = path.resolve(scriptDir, scriptName);
+
+				// Validate that the script is within the expected directory
+				if (
+					!scriptPath.startsWith(scriptDir + path.sep) &&
+					scriptPath !== scriptDir // handle case where scriptDir is the scriptPath
+				) {
+					logger.error(
+						"Attempted to execute script outside of allowed directory",
+						undefined,
+						{
+							scriptPath,
+							allowedDir: scriptDir,
+						}
+					);
+					return res.status(500).json({ message: "Internal server error" });
+				}
+
+				// Check that the script exists
+				try {
+					await fsPromises.access(scriptPath, fs.constants.F_OK);
+				} catch {
+					logger.error("Python script not found", undefined, { scriptPath });
+					return res.status(500).json({ message: "Internal server error" });
+				}
+
 				const options = {
 					mode: "text" as const,
 					pythonPath: process.platform === "win32" ? "python" : "python3",
 					pythonOptions: ["-u"],
-					scriptPath: path.join(process.cwd(), "server"),
+					scriptPath: scriptDir,
 					args: [req.file.path],
 				};
 
-				PythonShell.run("utils.py", options)
+				PythonShell.run(scriptName, options)
 					.then(async (results) => {
 						if (results && results.length > 0) {
 							try {
@@ -654,7 +682,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 			}
 
 			// Enhanced security: Comprehensive file path validation
-			const pathValidation = secureValidator.validatePath(filePath, "read");
+			const pathValidation = await secureValidator.validatePath(
+				filePath,
+				"read"
+			);
 			if (!pathValidation.isValid) {
 				console.warn("Path validation failed:", pathValidation.errors);
 				return res.status(403).json({

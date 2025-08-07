@@ -9,124 +9,130 @@ import { visualizer } from "rollup-plugin-visualizer";
 // Get directory name for ES modules (equivalent to __dirname in CommonJS)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig({
-	plugins: [
-		// React plugin for JSX transformation and Fast Refresh during development
-		react(),
-		// Bundle analyzer for analyzing bundle size
-		visualizer({
-			filename: "dist/bundle-analysis.html",
-			open: false,
-			gzipSize: true,
-		}),
-	],
+export default defineConfig(({ command }) => {
+	const isProduction = command === "build";
 
-	resolve: {
-		alias: {
-			// "@" alias points to client source directory for clean component imports
-			// Usage: import Component from "@/components/Component"
-			"@": path.resolve(__dirname, "client", "src"),
+	return {
+		plugins: [
+			// React plugin for JSX transformation and Fast Refresh during development
+			react(),
+			// Bundle analyzer for analyzing bundle size
+			visualizer({
+				filename: "dist/bundle-analysis.html",
+				open: false,
+				gzipSize: true,
+			}),
+		],
 
-			// "@shared" alias for shared types and schemas between client and server
-			// Usage: import { AudioTrack } from "@shared/schema"
-			"@shared": path.resolve(__dirname, "shared"),
+		resolve: {
+			alias: {
+				// "@" alias points to client source directory for clean component imports
+				// Usage: import Component from "@/components/Component"
+				"@": path.resolve(__dirname, "client", "src"),
 
-			// "@assets" alias for static assets and media files
-			// Usage: import logo from "@assets/logo.png"
-			"@assets": path.resolve(__dirname, "attached_assets"),
-		},
-	},
+				// "@shared" alias for shared types and schemas between client and server
+				// Usage: import { AudioTrack } from "@shared/schema"
+				"@shared": path.resolve(__dirname, "shared"),
 
-	// esbuild configuration for faster builds and minification
-	esbuild: {
-		drop: ["console", "debugger"],
-		pure: ["console.log", "console.info"],
-	},
-
-	// Set the root directory to the client folder for frontend development
-	// This allows Vite to serve the React application from the correct location
-	root: path.resolve(__dirname, "client"),
-
-	// Development server configuration
-	server: {
-		port: 5173,
-		proxy: {
-			// Proxy API requests to the backend server
-			"/api": {
-				target: "http://localhost:5000",
-				changeOrigin: true,
-				secure: false,
-			},
-			// Proxy WebSocket connections for real-time updates
-			"/socket.io": {
-				target: "http://localhost:5000",
-				changeOrigin: true,
-				ws: true,
+				// "@assets" alias for static assets and media files
+				// Usage: import logo from "@assets/logo.png"
+				"@assets": path.resolve(__dirname, "attached_assets"),
 			},
 		},
-	},
 
-	build: {
-		// Output directory for production builds
-		// Built files will be served by the Express server from this location
-		outDir: path.resolve(__dirname, "dist/public"),
+		// esbuild configuration - only drop console statements in production
+		esbuild: isProduction
+			? {
+					drop: ["console", "debugger"],
+					pure: ["console.log", "console.info"],
+			  }
+			: {},
 
-		// Clean the output directory before each build
-		// Ensures no stale files remain from previous builds
-		emptyOutDir: true,
+		// Set the root directory to the client folder for frontend development
+		// This allows Vite to serve the React application from the correct location
+		root: path.resolve(__dirname, "client"),
 
-		// Optimize bundle size
-		rollupOptions: {
-			output: {
-				manualChunks: {
-					// Separate vendor chunks for better caching
-					react: ["react", "react-dom"],
-					reactQuery: ["@tanstack/react-query"],
-					radixUI: [
-						"@radix-ui/react-dialog",
-						"@radix-ui/react-dropdown-menu",
-						"@radix-ui/react-label",
-						"@radix-ui/react-popover",
-						"@radix-ui/react-progress",
-						"@radix-ui/react-scroll-area",
-						"@radix-ui/react-select",
-						"@radix-ui/react-separator",
-						"@radix-ui/react-slider",
-						"@radix-ui/react-slot",
-						"@radix-ui/react-switch",
-						"@radix-ui/react-tabs",
-						"@radix-ui/react-toast",
-						"@radix-ui/react-tooltip",
-						"@radix-ui/react-alert-dialog",
-					],
-					icons: ["lucide-react", "react-icons"],
-					utils: ["clsx", "class-variance-authority", "tailwind-merge"],
+		// Development server configuration
+		server: {
+			port: 5173,
+			proxy: {
+				// Proxy API requests to the backend server
+				"/api": {
+					target: "http://localhost:5000",
+					changeOrigin: true,
+					secure: false,
+				},
+				// Proxy WebSocket connections for real-time updates
+				"/socket.io": {
+					target: "http://localhost:5000",
+					changeOrigin: true,
+					ws: true,
 				},
 			},
-			// External dependencies that should not be bundled
-			external: () => {
-				// Keep all dependencies internal for now to avoid runtime issues
-				return false;
-			},
-			// Tree shaking optimization
-			treeshake: {
-				moduleSideEffects: false,
-			},
 		},
 
-		// Enable minification for production (using esbuild for faster builds)
-		minify: "esbuild",
+		build: {
+			// Output directory for production builds
+			// Built files will be served by the Express server from this location
+			outDir: path.resolve(__dirname, "dist/public"),
 
-		// Chunk size warnings
-		chunkSizeWarningLimit: 600,
+			// Clean the output directory before each build
+			// Ensures no stale files remain from previous builds
+			emptyOutDir: true,
 
-		// Enable source maps for debugging in production (optional)
-		sourcemap: false,
+			// Optimize bundle size
+			rollupOptions: {
+				output: {
+					manualChunks: {
+						// Separate vendor chunks for better caching
+						react: ["react", "react-dom"],
+						reactQuery: ["@tanstack/react-query"],
+						radixUI: [
+							"@radix-ui/react-dialog",
+							"@radix-ui/react-dropdown-menu",
+							"@radix-ui/react-label",
+							"@radix-ui/react-popover",
+							"@radix-ui/react-progress",
+							"@radix-ui/react-scroll-area",
+							"@radix-ui/react-select",
+							"@radix-ui/react-separator",
+							"@radix-ui/react-slider",
+							"@radix-ui/react-slot",
+							"@radix-ui/react-switch",
+							"@radix-ui/react-tabs",
+							"@radix-ui/react-toast",
+							"@radix-ui/react-tooltip",
+							"@radix-ui/react-alert-dialog",
+						],
+						icons: ["lucide-react", "react-icons"],
+						utils: ["clsx", "class-variance-authority", "tailwind-merge"],
+					},
+				},
+				// External dependencies that should not be bundled
+				external: () => {
+					// Keep all dependencies internal for now to avoid runtime issues
+					return false;
+				},
+				// Tree shaking optimization
+				treeshake: {
+					moduleSideEffects: false,
+				},
+			},
 
-		// CSS code splitting
-		cssCodeSplit: true,
+			// Enable minification for production (using esbuild for faster builds)
+			minify: "esbuild",
 
-		// Optimize CSS
-		cssMinify: true,
-	},
+			// Chunk size warnings
+			chunkSizeWarningLimit: 600,
+
+			// Enable source maps for debugging in production (optional)
+			sourcemap: false,
+
+			// CSS code splitting
+			cssCodeSplit: true,
+
+			// Optimize CSS
+			cssMinify: true,
+		},
+	};
 });
